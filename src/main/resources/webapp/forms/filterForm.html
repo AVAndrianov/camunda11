@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Filter Organizations</title>
+</head>
+<body>
+<h1>Filter Organizations</h1>
+
+<p>Record Count: <span cam-variable-name="recordCount"></span></p>
+
+<label for="saveData">Save Filtered Data to File?</label>
+<input type="checkbox" id="saveData" name="saveData" cam-variable-name="saveData" />
+
+<input type="hidden" name="exportJson" cam-variable-name="exportJson" value="false" />
+
+<button type="button" onclick="setExportFlag()">Export JSON</button>
+<button cam-form-submit type="submit">Complete Task</button>
+
+<script>
+      function setExportFlag() {
+        document.querySelector('input[name="exportJson"]').value = "true";
+      }
+    </script>
+</body>
+</html>
