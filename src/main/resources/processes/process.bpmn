@@ -1,24 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.37.0">
-  <bpmn:process id="DebitProcess" name="TransactionConfirmation" isExecutable="true">
-    <bpmn:startEvent id="StartEvent_1" name="Start Debit Process">
+  <bpmn:process id="Process" name="GettingExchangeData" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1" name="Start Process">
       <bpmn:messageEventDefinition messageRef="Message_1" />
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="SequenceFlow_01j7h8s" sourceRef="StartEvent_1" targetRef="Activity_1" />
-    <bpmn:serviceTask id="Activity_1" name="Debit Account" camunda:delegateExpression="${debitAccountService}">
+    <bpmn:serviceTask id="Activity_1" name="Stock Exchange" camunda:delegateExpression="${stockExchangeService}">
       <bpmn:outgoing>Flow_06orw3i</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:boundaryEvent id="Event_020942s" name="Debit Failed" attachedToRef="Activity_1">
       <bpmn:outgoing>Flow_0mdune5</bpmn:outgoing>
       <bpmn:errorEventDefinition id="ErrorEventDefinition_1f0c29x" errorRef="Error_0v4r9x3" />
     </bpmn:boundaryEvent>
-    <bpmn:serviceTask id="Activity_0q9f15j" name="Notify Failure" camunda:delegateExpression="${notifyFailureService}">
-      <bpmn:outgoing>Flow_0f9j63z</bpmn:outgoing>
-    </bpmn:serviceTask>
-    <bpmn:endEvent id="Event_06u8l8w" name="Process Ended with Error">
-      <bpmn:incoming>Flow_0f9j63z</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_0f9j63z" sourceRef="Activity_0q9f15j" targetRef="Event_06u8l8w" />
     <bpmn:sequenceFlow id="Flow_0mdune5" sourceRef="Event_020942s" targetRef="UserTask_1" />
     <bpmn:userTask id="UserTask_1" name="Process Data" camunda:assignee="user">
       <bpmn:extensionElements>
@@ -33,6 +26,11 @@
       <bpmn:incoming>Flow_06orw3i</bpmn:incoming>
       <bpmn:outgoing>Flow_1vatr45</bpmn:outgoing>
     </bpmn:userTask>
+    <bpmn:endEvent id="Event_0y7b8hs" name="Debit Successful">
+      <bpmn:incoming>Flow_1a90a8b</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1vatr45" sourceRef="UserTask_1" targetRef="receiveMessageTask" />
+    <bpmn:sequenceFlow id="Flow_06orw3i" sourceRef="Activity_1" targetRef="UserTask_1" />
     <bpmn:receiveTask id="receiveMessageTask" name="Receive Confirmation" messageRef="Message_3kkf69o">
       <bpmn:extensionElements>
         <camunda:inputOutput>
@@ -44,73 +42,52 @@
       <bpmn:incoming>Flow_1vatr45</bpmn:incoming>
       <bpmn:outgoing>Flow_1a90a8b</bpmn:outgoing>
     </bpmn:receiveTask>
-    <bpmn:endEvent id="Event_0y7b8hs" name="Debit Successful">
-      <bpmn:incoming>Flow_1a90a8b</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_1vatr45" sourceRef="UserTask_1" targetRef="receiveMessageTask" />
     <bpmn:sequenceFlow id="Flow_1a90a8b" sourceRef="receiveMessageTask" targetRef="Event_0y7b8hs" />
-    <bpmn:sequenceFlow id="Flow_06orw3i" sourceRef="Activity_1" targetRef="UserTask_1" />
   </bpmn:process>
-  <bpmn:message id="Message_1" name="startDebitProcess" />
+  <bpmn:message id="Message_1" name="startProcess" />
   <bpmn:error id="Error_0v4r9x3" name="debitFailed" errorCode="debitFailed" />
   <bpmn:message id="Message_3kkf69o" name="confirmationMessage" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="DebitProcess">
-      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
-        <dc:Bounds x="159" y="99" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="152" y="142" width="52" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process">
       <bpmndi:BPMNShape id="Activity_1_di" bpmnElement="Activity_1">
         <dc:Bounds x="250" y="77" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0q9f15j_di" bpmnElement="Activity_0q9f15j">
-        <dc:Bounds x="240" y="320" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_06u8l8w_di" bpmnElement="Event_06u8l8w">
-        <dc:Bounds x="412" y="342" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="393" y="385" width="75" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="UserTask_1_di" bpmnElement="UserTask_1">
-        <dc:Bounds x="380" y="200" width="100" height="80" />
+        <dc:Bounds x="380" y="77" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_13wg4vv_di" bpmnElement="receiveMessageTask">
-        <dc:Bounds x="520" y="200" width="100" height="80" />
+        <dc:Bounds x="510" y="77" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0y7b8hs_di" bpmnElement="Event_0y7b8hs">
-        <dc:Bounds x="662" y="222" width="36" height="36" />
+        <dc:Bounds x="652" y="99" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="640" y="265" width="82" height="14" />
+          <dc:Bounds x="630" y="142" width="82" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="172" y="99" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="158" y="142" width="67" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_01j7h8s_di" bpmnElement="SequenceFlow_01j7h8s">
-        <di:waypoint x="195" y="117" />
+        <di:waypoint x="208" y="117" />
         <di:waypoint x="250" y="117" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0f9j63z_di" bpmnElement="Flow_0f9j63z">
-        <di:waypoint x="340" y="360" />
-        <di:waypoint x="412" y="360" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1vatr45_di" bpmnElement="Flow_1vatr45">
-        <di:waypoint x="480" y="240" />
-        <di:waypoint x="520" y="240" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1a90a8b_di" bpmnElement="Flow_1a90a8b">
-        <di:waypoint x="620" y="240" />
-        <di:waypoint x="662" y="240" />
+        <di:waypoint x="480" y="117" />
+        <di:waypoint x="510" y="117" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_06orw3i_di" bpmnElement="Flow_06orw3i">
         <di:waypoint x="350" y="117" />
-        <di:waypoint x="365" y="117" />
-        <di:waypoint x="365" y="240" />
-        <di:waypoint x="380" y="240" />
+        <di:waypoint x="380" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1a90a8b_di" bpmnElement="Flow_1a90a8b">
+        <di:waypoint x="610" y="117" />
+        <di:waypoint x="652" y="117" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

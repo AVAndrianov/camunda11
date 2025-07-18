@@ -6,10 +6,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @EnableProcessApplication
-public class CamundaDebitAppApplication {
+public class CamundaAppApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(CamundaDebitAppApplication.class, args);
+        SpringApplication.run(CamundaAppApplication.class, args);
     }
 
 }

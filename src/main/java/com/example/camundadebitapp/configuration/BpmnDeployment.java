@@ -16,11 +16,11 @@ public class BpmnDeployment {
 
     @PostConstruct
     public void deployBpmn() {
-        String bpmnFilePath = "processes/debit_process.bpmn";
+        String bpmnFilePath = "processes/process.bpmn";
         InputStream bpmnStream = getClass().getClassLoader().getResourceAsStream(bpmnFilePath);
         if (bpmnStream != null) {
             Deployment deployment = repositoryService.createDeployment()
-                    .addInputStream("debit_process.bpmn", bpmnStream)
+                    .addInputStream("process.bpmn", bpmnStream)
                     .deploy();
             System.out.println("BPMN процесс развернут: " + deployment.getId());
         } else {
