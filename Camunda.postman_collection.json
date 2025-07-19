@@ -36,6 +36,36 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "StartProcessUrl",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/otc/lookup-table/startProcessUrl?url=https://api.spimex.com/otc/lookup-tables/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"otc",
+						"lookup-table",
+						"startProcessUrl"
+					],
+					"query": [
+						{
+							"key": "url",
+							"value": "https://api.spimex.com/otc/lookup-tables/1"
+						}
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }
