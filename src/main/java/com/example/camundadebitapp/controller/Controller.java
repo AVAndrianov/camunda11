@@ -1,5 +1,6 @@
 package com.example.camundadebitapp.controller;
 
+import com.example.camundadebitapp.service.URLDownloader;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
@@ -24,15 +25,25 @@ public class Controller {
 
     @Autowired
     private RuntimeService runtimeService;
-
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private URLDownloader urlDownloader;
 
     @GetMapping("/startProcess")
     public ResponseEntity<String> startProcessGet(String message) throws Exception {
+
         String decodedJson = java.net.URLDecoder.decode(message, java.nio.charset.StandardCharsets.UTF_8.name());
         Object json = objectMapper.readValue(decodedJson, Object.class);
         String formattedJson = objectMapper.writeValueAsString(json);
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("message", formattedJson);
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByMessage("startProcess", variables);
+        return ResponseEntity.ok("Процесс запущен: " + processInstance.getProcessInstanceId());
+    }
+    @GetMapping("/startProcessUrl")
+    public ResponseEntity<String> startProcessGetUrlDownloader(String url) throws Exception {
+        String formattedJson = URLDownloader.download(url);
         Map<String, Object> variables = new HashMap<>();
         variables.put("message", formattedJson);
         ProcessInstance processInstance = runtimeService.startProcessInstanceByMessage("startProcess", variables);
