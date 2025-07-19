@@ -7,11 +7,12 @@
 <h1>User Task Form</h1>
 
 <form name="myForm" cam-form>
+  <label for="count">Количество элементов:</label>
+  <textarea id="count" cam-variable-name="count" cam-variable-type="String"></textarea><br>
   <label for="filterMessage">Message:</label>
   <textarea id="filterMessage" cam-variable-name="filterMessage" cam-variable-type="String"></textarea><br>
 
   <button id="downloadButton" type="button">Download Message</button>
-<!--  <button type="submit" cam-form-submit>Complete Task</button>-->
 </form>
 
 <script>
