@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User Task Form</title>
+</head>
+<body>
+<h1>User Task Form</h1>
+
+<form name="myForm" cam-form>
+  <label for="filterMessage">Message:</label>
+  <textarea id="filterMessage" cam-variable-name="filterMessage" cam-variable-type="String"></textarea><br>
+
+  <button id="downloadButton" type="button">Download Message</button>
+<!--  <button type="submit" cam-form-submit>Complete Task</button>-->
+</form>
+
+<script>
+    document.getElementById('downloadButton').addEventListener('click', function() {
+        var message = document.getElementById("filterMessage").value;
+
+        const blob = new Blob([message], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'message.json';
+
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+</script>
+</body>
+</html>

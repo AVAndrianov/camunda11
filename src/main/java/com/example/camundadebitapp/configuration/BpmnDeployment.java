@@ -1,11 +1,11 @@
 package com.example.camundadebitapp.configuration;
 
+import jakarta.annotation.PostConstruct;
 import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.repository.Deployment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.InputStream;
 
 @Component
