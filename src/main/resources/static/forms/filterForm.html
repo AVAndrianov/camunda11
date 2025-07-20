@@ -1,35 +1,103 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-  <title>User Task Form</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f6f8;
+    margin: 0;
+    padding: 40px;
+  }
+
+  h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+  }
+
+  form {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #555;
+  }
+
+  input[type="text"],
+  textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 10px;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  input[type="text"]:focus,
+  textarea:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0,123,255,0.2);
+    outline: none;
+  }
+
+  textarea {
+    min-height: 120px;
+    resize: vertical;
+    font-size: 10px;
+  }
+
+  #downloadButton {
+    margin-top: 20px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: normal;
+    color: #fff;
+    background-color: #28a745;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+#downloadButton:hover {
+   background-color:#218838;
+   transform: translateY(-1px);
+}
+</style>
 </head>
 <body>
-<h1>User Task Form</h1>
-
 <form name="myForm" cam-form>
-  <label for="count">Количество элементов:</label>
-  <textarea id="count" cam-variable-name="count" cam-variable-type="String"></textarea><br>
+  <label for="count">Количество организаций:</label>
+  <input id="count" cam-variable-name="count" cam-variable-type="String"/>
   <label for="filterMessage">Message:</label>
-  <textarea id="filterMessage" cam-variable-name="filterMessage" cam-variable-type="String"></textarea><br>
-
+  <textarea id="filterMessage" cam-variable-name="filterMessage" cam-variable-type="String"></textarea>
   <button id="downloadButton" type="button">Download Message</button>
 </form>
-
 <script>
-    document.getElementById('downloadButton').addEventListener('click', function() {
-        var message = document.getElementById("filterMessage").value;
-
-        const blob = new Blob([message], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'message.json';
-
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    });
+document.getElementById('downloadButton').addEventListener('click', function() {
+	const message = document.getElementById('filterMessage').value;
+	const blob = new Blob([message], { type:'text/plain' });
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement('a');
+	a.href = url;
+	a.download = 'message.json';
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+	URL.revokeObjectURL(url);
+});
 </script>
+
 </body>
 </html>
