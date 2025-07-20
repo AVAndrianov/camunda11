@@ -42,8 +42,6 @@
 
 ## API эндпоинты
 
-### Пользователи
-
 - **GET /otc/lookup-table/startProcessUrl/:url:** Передайте url через которые будут получены данные. url: `https://api.spimex.com/otc/lookup-tables/1`
 - **GET /otc/lookup-table/startProcess/:message:** Передайте сообщение в json формате. Перед отправкой сообщение необходимо экранировать.
 
