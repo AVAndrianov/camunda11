@@ -25,8 +25,6 @@ public class StockExchangeService implements JavaDelegate {
                         && i.INN.startsWith("77")
                         && !i.Name.contains("ИП")
         ).collect(Collectors.toList());
-        System.out.println((long) elements.records.size());
-
         execution.setVariable("filterMessage", toJson(elements));
         execution.setVariable("count", elements.records.size());
     }

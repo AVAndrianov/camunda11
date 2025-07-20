@@ -24,7 +24,7 @@
       <bpmn:incoming>Flow_0mdune5</bpmn:incoming>
       <bpmn:outgoing>Flow_1vatr45</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:endEvent id="Event_0y7b8hs" name="Debit Successful">
+    <bpmn:endEvent id="Event_0y7b8hs" name="End Process">
       <bpmn:incoming>Flow_1vatr45</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_1vatr45" sourceRef="UserTask_1" targetRef="Event_0y7b8hs" />
@@ -52,7 +52,7 @@
       <bpmndi:BPMNShape id="Event_0y7b8hs_di" bpmnElement="Event_0y7b8hs">
         <dc:Bounds x="512" y="99" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="490" y="142" width="82" height="14" />
+          <dc:Bounds x="500" y="142" width="63" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_01j7h8s_di" bpmnElement="SequenceFlow_01j7h8s">

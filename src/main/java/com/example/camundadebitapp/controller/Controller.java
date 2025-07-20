@@ -41,8 +41,8 @@ public class Controller {
     }
 
     @GetMapping("/startProcessUrl")
-    public ResponseEntity<String> startProcessGetUrlDownloader(String url) throws Exception {
-        String formattedJson = urlDownloader.download(url);
+    public ResponseEntity<String> startProcessGetUrlDownloader(String url) {
+        String formattedJson = URLDownloader.download(url);
         Map<String, Object> variables = new HashMap<>();
         variables.put("message", formattedJson);
         ProcessInstance processInstance = runtimeService.startProcessInstanceByMessage("startProcess", variables);
