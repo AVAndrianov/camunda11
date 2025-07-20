@@ -1,6 +1,6 @@
 package com.example.camundadebitapp.controller;
 
-import com.example.camundadebitapp.service.URLDownloader;
+import com.example.camundadebitapp.util.URLDownloader;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
@@ -15,14 +15,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/otc/lookup-table")
 public class Controller {
-
     @Autowired
     private RuntimeService runtimeService;
     @Autowired
@@ -41,9 +39,10 @@ public class Controller {
         ProcessInstance processInstance = runtimeService.startProcessInstanceByMessage("startProcess", variables);
         return ResponseEntity.ok("Процесс запущен: " + processInstance.getProcessInstanceId());
     }
+
     @GetMapping("/startProcessUrl")
     public ResponseEntity<String> startProcessGetUrlDownloader(String url) throws Exception {
-        String formattedJson = URLDownloader.download(url);
+        String formattedJson = urlDownloader.download(url);
         Map<String, Object> variables = new HashMap<>();
         variables.put("message", formattedJson);
         ProcessInstance processInstance = runtimeService.startProcessInstanceByMessage("startProcess", variables);

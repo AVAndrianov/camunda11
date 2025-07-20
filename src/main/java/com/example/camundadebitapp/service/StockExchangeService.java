@@ -1,6 +1,6 @@
 package com.example.camundadebitapp.service;
 
-import com.example.camundadebitapp.dto.JsonMapper;
+import com.example.camundadebitapp.model.JsonMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class StockExchangeService implements JavaDelegate {
 
     @Override
-    public void execute(DelegateExecution execution) throws JsonProcessingException {
+    public void execute(DelegateExecution execution) throws Exception {
         String message = (String) execution.getVariable("message");
         ObjectMapper objectMapper = new ObjectMapper();
         JsonMapper.Response elements = objectMapper.readValue(message, JsonMapper.Response.class);
@@ -25,6 +25,8 @@ public class StockExchangeService implements JavaDelegate {
                         && i.INN.startsWith("77")
                         && !i.Name.contains("ИП")
         ).collect(Collectors.toList());
+        System.out.println((long) elements.records.size());
+
         execution.setVariable("filterMessage", toJson(elements));
         execution.setVariable("count", elements.records.size());
     }

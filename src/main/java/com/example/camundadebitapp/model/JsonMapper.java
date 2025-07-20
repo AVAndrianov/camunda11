@@ -1,4 +1,4 @@
-package com.example.camundadebitapp.dto;
+package com.example.camundadebitapp.model;
 
 import java.io.Serializable;
 import java.util.List;
