@@ -1,4 +1,4 @@
-package com.example.camundadebitapp.model;
+package com.example.camundaExchange.model;
 
 import java.io.Serializable;
 import java.util.List;

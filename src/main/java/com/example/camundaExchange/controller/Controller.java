@@ -1,6 +1,6 @@
-package com.example.camundadebitapp.controller;
+package com.example.camundaExchange.controller;
 
-import com.example.camundadebitapp.util.URLDownloader;
+import com.example.camundaExchange.util.URLDownloader;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.runtime.ProcessInstance;

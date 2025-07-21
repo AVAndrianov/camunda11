@@ -1,4 +1,4 @@
-package com.example.camundadebitapp;
+package com.example.camundaExchange;
 
 import org.camunda.bpm.spring.boot.starter.annotation.EnableProcessApplication;
 import org.springframework.boot.SpringApplication;

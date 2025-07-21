@@ -1,4 +1,4 @@
-package com.example.camundadebitapp.util;
+package com.example.camundaExchange.util;
 
 import org.springframework.stereotype.Component;
 

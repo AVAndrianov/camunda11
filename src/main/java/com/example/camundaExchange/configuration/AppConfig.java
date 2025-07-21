@@ -1,4 +1,4 @@
-package com.example.camundadebitapp.configuration;
+package com.example.camundaExchange.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
