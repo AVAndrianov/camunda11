@@ -8,36 +8,6 @@
 	},
 	"item": [
 		{
-			"name": "StartProcess",
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8080/otc/lookup-table/startProcess?message=%7B%0A++%22result%22%3A+%22OK%22%2C%0A++%22records%22%3A+%5B%0A++++%7B%0A++++++%22ID%22%3A+%220%22%2C%0A++++++%22Name%22%3A+%22%D0%9A%D0%BE%D0%BC%D0%BF%D0%B0%D0%BD%D0%B8%D1%8F+%D0%BD%D0%B5+%D0%BE%D0%BF%D1%80%D0%B5%D0%B4%D0%B5%D0%BB%D0%B5%D0%BD%D0%B0%22%2C%0A++++++%22INN%22%3A+%22%D0%9D%D0%B5+%D0%BE%D0%BF%D1%80%D0%B5%D0%B4%D0%B5%D0%BB%D0%B5%D0%BD%22%2C%0A++++++%22Residence%22%3A+%22%D0%9D%D0%B5+%D0%BE%D0%BF%D1%80%D0%B5%D0%B4%D0%B5%D0%BB%D0%B5%D0%BD%22%2C%0A++++++%22StoreDate%22%3A+%2201.01.2000+00%3A00%3A00%22%2C%0A++++++%22BlockDate%22%3A+%2201.01.2000+00%3A00%3A00%22%0A++++%7D%2C%0A++++%7B%0A++++++%22ID%22%3A+%221%22%2C%0A++++++%22Name%22%3A+%22%D0%A1%D0%9F+%D0%A3%D1%80%D0%BE%D0%B6%D0%B0%D0%B9+%D0%9E%D0%9E%D0%9E%22%2C%0A++++++%22INN%22%3A+%2205008145%22%2C%0A++++++%22Residence%22%3A+%22%D0%A0%D0%B5%D0%B7%D0%B8%D0%B4%D0%B5%D0%BD%D1%82+%D0%A0%D0%A4%22%2C%0A++++++%22StoreDate%22%3A+%2201.01.2021+00%3A00%3A00%22%2C%0A++++++%22BlockDate%22%3A+%22%22%0A++++%7D%2C%0A++++%7B%0A++++++%22ID%22%3A+%222%22%2C%0A++++++%22Name%22%3A+%22%D0%A8%D0%BA%D0%B0%D0%BF%D0%BE%D0%B2%D1%81%D0%BA%D0%BE%D0%B5+%D0%93%D0%9F%D0%9F+%D0%9E%D0%9E%D0%9E%22%2C%0A++++++%22INN%22%3A+%2255017547%22%2C%0A++++++%22Residence%22%3A+%22%D0%A0%D0%B5%D0%B7%D0%B8%D0%B4%D0%B5%D0%BD%D1%82+%D0%A0%D0%A4%22%2C%0A++++++%22StoreDate%22%3A+%2201.01.2021+00%3A00%3A00%22%2C%0A++++++%22BlockDate%22%3A+%22%22%0A++++%7D%2C%0A++++%7B%0A++++++%22ID%22%3A+%223%22%2C%0A++++++%22Name%22%3A+%22%D0%93%D0%B0%D0%B7%D0%BF%D1%80%D0%BE%D0%BC+%D0%9D%D0%B5%D1%84%D1%82%D0%B5%D1%85%D0%B8%D0%BC+%D0%A1%D0%B0%D0%BB%D0%B0%D0%B2%D0%B0%D1%82+%D0%9E%D0%9E%D0%9E%22%2C%0A++++++%22INN%22%3A+%227766048970%22%2C%0A++++++%22Residence%22%3A+%22%D0%A0%D0%B5%D0%B7%D0%B8%D0%B4%D0%B5%D0%BD%D1%82+%D0%A0%D0%A4%22%2C%0A++++++%22StoreDate%22%3A+%2201.01.2021+00%3A00%3A00%22%2C%0A++++++%22BlockDate%22%3A+%22%22%0A++++%7D%0A++%5D%0A%7D\n",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"otc",
-						"lookup-table",
-						"startProcess"
-					],
-					"query": [
-						{
-							"key": "message",
-							"value": "%7B%0A++%22result%22%3A+%22OK%22%2C%0A++%22records%22%3A+%5B%0A++++%7B%0A++++++%22ID%22%3A+%220%22%2C%0A++++++%22Name%22%3A+%22%D0%9A%D0%BE%D0%BC%D0%BF%D0%B0%D0%BD%D0%B8%D1%8F+%D0%BD%D0%B5+%D0%BE%D0%BF%D1%80%D0%B5%D0%B4%D0%B5%D0%BB%D0%B5%D0%BD%D0%B0%22%2C%0A++++++%22INN%22%3A+%22%D0%9D%D0%B5+%D0%BE%D0%BF%D1%80%D0%B5%D0%B4%D0%B5%D0%BB%D0%B5%D0%BD%22%2C%0A++++++%22Residence%22%3A+%22%D0%9D%D0%B5+%D0%BE%D0%BF%D1%80%D0%B5%D0%B4%D0%B5%D0%BB%D0%B5%D0%BD%22%2C%0A++++++%22StoreDate%22%3A+%2201.01.2000+00%3A00%3A00%22%2C%0A++++++%22BlockDate%22%3A+%2201.01.2000+00%3A00%3A00%22%0A++++%7D%2C%0A++++%7B%0A++++++%22ID%22%3A+%221%22%2C%0A++++++%22Name%22%3A+%22%D0%A1%D0%9F+%D0%A3%D1%80%D0%BE%D0%B6%D0%B0%D0%B9+%D0%9E%D0%9E%D0%9E%22%2C%0A++++++%22INN%22%3A+%2205008145%22%2C%0A++++++%22Residence%22%3A+%22%D0%A0%D0%B5%D0%B7%D0%B8%D0%B4%D0%B5%D0%BD%D1%82+%D0%A0%D0%A4%22%2C%0A++++++%22StoreDate%22%3A+%2201.01.2021+00%3A00%3A00%22%2C%0A++++++%22BlockDate%22%3A+%22%22%0A++++%7D%2C%0A++++%7B%0A++++++%22ID%22%3A+%222%22%2C%0A++++++%22Name%22%3A+%22%D0%A8%D0%BA%D0%B0%D0%BF%D0%BE%D0%B2%D1%81%D0%BA%D0%BE%D0%B5+%D0%93%D0%9F%D0%9F+%D0%9E%D0%9E%D0%9E%22%2C%0A++++++%22INN%22%3A+%2255017547%22%2C%0A++++++%22Residence%22%3A+%22%D0%A0%D0%B5%D0%B7%D0%B8%D0%B4%D0%B5%D0%BD%D1%82+%D0%A0%D0%A4%22%2C%0A++++++%22StoreDate%22%3A+%2201.01.2021+00%3A00%3A00%22%2C%0A++++++%22BlockDate%22%3A+%22%22%0A++++%7D%2C%0A++++%7B%0A++++++%22ID%22%3A+%223%22%2C%0A++++++%22Name%22%3A+%22%D0%93%D0%B0%D0%B7%D0%BF%D1%80%D0%BE%D0%BC+%D0%9D%D0%B5%D1%84%D1%82%D0%B5%D1%85%D0%B8%D0%BC+%D0%A1%D0%B0%D0%BB%D0%B0%D0%B2%D0%B0%D1%82+%D0%9E%D0%9E%D0%9E%22%2C%0A++++++%22INN%22%3A+%227766048970%22%2C%0A++++++%22Residence%22%3A+%22%D0%A0%D0%B5%D0%B7%D0%B8%D0%B4%D0%B5%D0%BD%D1%82+%D0%A0%D0%A4%22%2C%0A++++++%22StoreDate%22%3A+%2201.01.2021+00%3A00%3A00%22%2C%0A++++++%22BlockDate%22%3A+%22%22%0A++++%7D%0A++%5D%0A%7D\n"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "StartProcessUrl",
 			"request": {
 				"auth": {

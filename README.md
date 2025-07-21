@@ -43,5 +43,3 @@
 ## API эндпоинты
 
 - **GET /otc/lookup-table/startProcessUrl** Запускает бп. Данные для обработки будут получены по url: `https://api.spimex.com/otc/lookup-tables/1` в блоке Stock Exchange
-- **GET /otc/lookup-table/startProcess/:message:** Передайте сообщение в json формате. Перед отправкой сообщение необходимо экранировать.
-
