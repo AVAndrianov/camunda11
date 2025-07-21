@@ -8,6 +8,7 @@
     <bpmn:serviceTask id="Activity_1" name="Stock Exchange" camunda:asyncBefore="true" camunda:exclusive="false" camunda:delegateExpression="${stockExchangeService}">
       <bpmn:incoming>Flow_1dzy8yi</bpmn:incoming>
       <bpmn:outgoing>Flow_AfterServiceTask</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1e1likw</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:userTask id="UserTask_1" name="Process Data" camunda:formKey="embedded:app:forms/filterForm.html" camunda:assignee="user">
       <bpmn:extensionElements>
@@ -26,51 +27,53 @@
     <bpmn:sequenceFlow id="Flow_1vatr45" sourceRef="UserTask_1" targetRef="Event_0y7b8hs" />
     <bpmn:sequenceFlow id="Flow_TimerToServiceTask" sourceRef="TimerEvent_1" targetRef="Gateway_00czf7q" />
     <bpmn:sequenceFlow id="Flow_AfterServiceTask" sourceRef="Activity_1" targetRef="UserTask_1" />
-    <bpmn:boundaryEvent id="TimerEvent_1" name="30" attachedToRef="Activity_1">
-      <bpmn:outgoing>Flow_TimerToServiceTask</bpmn:outgoing>
-      <bpmn:timerEventDefinition id="TimerEventDefinition_05we074">
-        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT30S</bpmn:timeDuration>
-      </bpmn:timerEventDefinition>
-    </bpmn:boundaryEvent>
     <bpmn:exclusiveGateway id="Gateway_00czf7q">
       <bpmn:incoming>SequenceFlow_01j7h8s</bpmn:incoming>
       <bpmn:incoming>Flow_TimerToServiceTask</bpmn:incoming>
       <bpmn:outgoing>Flow_1dzy8yi</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_1dzy8yi" sourceRef="Gateway_00czf7q" targetRef="Activity_1" />
+    <bpmn:intermediateCatchEvent id="TimerEvent_1" name="RestartTimer">
+      <bpmn:incoming>Flow_1e1likw</bpmn:incoming>
+      <bpmn:outgoing>Flow_TimerToServiceTask</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_0ohu6cr">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT30S</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_1e1likw" sourceRef="Activity_1" targetRef="TimerEvent_1" />
   </bpmn:process>
   <bpmn:message id="Message_1" name="startProcess" />
   <bpmn:error id="Error_0v4r9x3" name="debitFailed" errorCode="debitFailed" />
   <bpmn:message id="Message_3kkf69o" name="confirmationMessage" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process">
-      <bpmndi:BPMNShape id="Activity_1_di" bpmnElement="Activity_1">
-        <dc:Bounds x="320" y="77" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="UserTask_1_di" bpmnElement="UserTask_1">
-        <dc:Bounds x="620" y="77" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0y7b8hs_di" bpmnElement="Event_0y7b8hs">
-        <dc:Bounds x="770" y="99" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="758" y="142" width="63" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_00czf7q_di" bpmnElement="Gateway_00czf7q" isMarkerVisible="true">
-        <dc:Bounds x="245" y="92" width="50" height="50" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
         <dc:Bounds x="172" y="99" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="158" y="142" width="67" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0a7n3ii_di" bpmnElement="TimerEvent_1">
-        <dc:Bounds x="372" y="139" width="36" height="36" />
+      <bpmndi:BPMNShape id="Gateway_00czf7q_di" bpmnElement="Gateway_00czf7q" isMarkerVisible="true">
+        <dc:Bounds x="245" y="92" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask_1_di" bpmnElement="UserTask_1">
+        <dc:Bounds x="470" y="77" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0y7b8hs_di" bpmnElement="Event_0y7b8hs">
+        <dc:Bounds x="612" y="99" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="384" y="182" width="13" height="14" />
+          <dc:Bounds x="600" y="142" width="63" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1_di" bpmnElement="Activity_1">
+        <dc:Bounds x="330" y="77" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0mqy875_di" bpmnElement="TimerEvent_1">
+        <dc:Bounds x="362" y="184" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="349" y="227" width="64" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_01j7h8s_di" bpmnElement="SequenceFlow_01j7h8s">
@@ -78,22 +81,25 @@
         <di:waypoint x="245" y="117" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1vatr45_di" bpmnElement="Flow_1vatr45">
-        <di:waypoint x="720" y="117" />
-        <di:waypoint x="770" y="117" />
+        <di:waypoint x="570" y="117" />
+        <di:waypoint x="612" y="117" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_TimerToServiceTask_di" bpmnElement="Flow_TimerToServiceTask">
-        <di:waypoint x="390" y="175" />
-        <di:waypoint x="390" y="195" />
-        <di:waypoint x="270" y="195" />
+        <di:waypoint x="380" y="184" />
+        <di:waypoint x="270" y="184" />
         <di:waypoint x="270" y="142" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_AfterServiceTask_di" bpmnElement="Flow_AfterServiceTask">
-        <di:waypoint x="420" y="117" />
-        <di:waypoint x="620" y="117" />
+        <di:waypoint x="430" y="117" />
+        <di:waypoint x="470" y="117" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1dzy8yi_di" bpmnElement="Flow_1dzy8yi">
         <di:waypoint x="295" y="117" />
-        <di:waypoint x="320" y="117" />
+        <di:waypoint x="330" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1e1likw_di" bpmnElement="Flow_1e1likw">
+        <di:waypoint x="380" y="157" />
+        <di:waypoint x="380" y="184" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
