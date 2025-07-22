@@ -44,8 +44,7 @@ public class StockExchangeService implements JavaDelegate {
             }
             timerCounter++;
             execution.setVariable("timerCounter", timerCounter);
-//            String message = URLDownloader.download(downloadUrl);
-            String message = null;
+            String message = URLDownloader.download(downloadUrl);
             if (message == null || message.isEmpty()) {
                 log.warn("URLDownloader вернул пустую строку.  Активируем таймер.");
                 execution.setVariable("downloadSuccessful", false);
