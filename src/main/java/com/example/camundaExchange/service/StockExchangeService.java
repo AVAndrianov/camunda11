@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  */
 @Service("stockExchangeService")
 @Slf4j
-public class StockExchangeService implements JavaDelegate {
+public class StockExchangeService implements StockExchangeProcessor {
 
     /**
      * URL для загрузки данных с фондовой биржи.
