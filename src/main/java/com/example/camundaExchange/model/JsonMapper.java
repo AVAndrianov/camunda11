@@ -1,8 +1,5 @@
 package com.example.camundaExchange.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Data;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
@@ -17,8 +14,6 @@ public class JsonMapper implements Serializable {
     /**
      * Класс, представляющий структуру ответа API.
      */
-    @Data
-    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Response {
         public String result;
         public List<Record> records;
@@ -27,8 +22,6 @@ public class JsonMapper implements Serializable {
     /**
      * Класс, представляющий структуру записи об участнике торгов.
      */
-    @Data
-    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Record implements Serializable {
         @Serial
         private static final long serialVersionUID = 1L;

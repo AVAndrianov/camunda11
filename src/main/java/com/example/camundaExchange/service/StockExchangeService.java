@@ -37,7 +37,6 @@ public class StockExchangeService implements JavaDelegate {
     @Override
     public void execute(DelegateExecution execution) {
         try {
-            System.out.println("StockExchangeService");
             Integer timerCounter = (Integer) execution.getVariable("timerCounter");
             if (timerCounter == null) {
                 timerCounter = 0;
