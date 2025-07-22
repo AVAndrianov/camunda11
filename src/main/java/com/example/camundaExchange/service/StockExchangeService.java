@@ -13,16 +13,36 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * • Сервис для получения данных с фондовой биржи, фильтрации и установки переменных процесса.
+ * • Реализует интерфейс {@link JavaDelegate} для интеграции с Camunda BPM.
+ */
 @Service("stockExchangeService")
 @Slf4j
 public class StockExchangeService implements JavaDelegate {
 
+    /**
+     * URL для загрузки данных с фондовой биржи.
+     */
     @Autowired
     private String downloadUrl;
 
+    /**
+     * Выполняет логику получения, фильтрации и обработки данных с фондовой биржи.
+     * В случае ошибки активирует Timer Boundary Event и отправляет сообщение в Telegram.
+     *
+     * @param execution Объект {@link DelegateExecution}, содержащий информацию о текущем выполнении процесса.
+     * @throws Exception В случае ошибок при загрузке или обработке данных.
+     */
     @Override
     public void execute(DelegateExecution execution) {
         try {
+            Integer timerCounter = (Integer) execution.getVariable("timerCounter");
+            if (timerCounter == null) {
+                timerCounter = 0;
+            }
+            timerCounter++;
+            execution.setVariable("timerCounter", timerCounter);
             String message = URLDownloader.download(downloadUrl);
             if (message == null || message.isEmpty()) {
                 log.warn("URLDownloader вернул пустую строку.  Активируем таймер.");
@@ -54,6 +74,13 @@ public class StockExchangeService implements JavaDelegate {
         }
     }
 
+    /**
+     * Преобразует объект {@link JsonMapper.Response} в JSON строку.
+     *
+     * @param response Объект {@link JsonMapper.Response} для преобразования.
+     * @return JSON строка, представляющая объект.
+     * @throws JsonProcessingException В случае ошибки при преобразовании в JSON.
+     */
     public static String toJson(JsonMapper.Response response) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.writeValueAsString(response);

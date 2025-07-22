@@ -14,18 +14,38 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.ByteArrayInputStream;
 
+/**
+ * REST-контроллер для управления процессами Camunda и предоставления доступа к данным.
+ * Обеспечивает запуск процессов и скачивание JSON-данных, связанных с экземплярами процессов.
+ */
 @RestController
 @RequestMapping("/otc/lookup-table")
 public class Controller {
+    /**
+     * Сервис времени выполнения Camunda, используемый для управления экземплярами процессов.
+     */
     @Autowired
     private RuntimeService runtimeService;
 
+    /**
+     * Запускает экземпляр процесса Camunda по сообщению "startProcess".
+     *
+     * @return {@link ResponseEntity} со строковым сообщением, содержащим ID запущенного экземпляра процесса.
+     */
     @GetMapping("/startProcess")
     public ResponseEntity<String> startProcessGet() {
         ProcessInstance processInstance = runtimeService.startProcessInstanceByMessage("startProcess");
         return ResponseEntity.ok("Процесс запущен: " + processInstance.getProcessInstanceId());
     }
 
+    /**
+     * Предоставляет возможность скачивания JSON-данных, связанных с экземпляром процесса.
+     * Создает файл JSON для скачивания на основе предоставленных данных и ID экземпляра процесса.
+     *
+     * @param jsonData          JSON-данные для скачивания (в виде строки).
+     * @param processInstanceId ID экземпляра процесса, связанного с данными.
+     * @return {@link ResponseEntity} с {@link InputStreamResource}, позволяющим скачивать JSON-файл.
+     */
     @GetMapping("/downloadJson")
     public ResponseEntity<InputStreamResource> downloadJson(@RequestParam String jsonData,
                                                             @RequestParam String processInstanceId) {

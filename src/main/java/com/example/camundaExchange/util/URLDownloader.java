@@ -9,9 +9,19 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+/**
+ • Утилитарный класс для загрузки данных с URL.
+ */
 @Component
 public class URLDownloader {
 
+    /**
+     * Загружает данные с указанного URL и возвращает их в виде строки.
+     *
+     * @param urlString URL для загрузки данных.
+     * @return Строка, содержащая данные, загруженные с URL, или null в случае ошибки.
+     * @throws IOException В случае ошибок при подключении или чтении данных с URL.
+     */
     public static String download(String urlString) {
         StringBuilder result = new StringBuilder();
         try {
