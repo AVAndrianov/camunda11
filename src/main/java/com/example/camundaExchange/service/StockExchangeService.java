@@ -37,13 +37,15 @@ public class StockExchangeService implements JavaDelegate {
     @Override
     public void execute(DelegateExecution execution) {
         try {
+            System.out.println("StockExchangeService");
             Integer timerCounter = (Integer) execution.getVariable("timerCounter");
             if (timerCounter == null) {
                 timerCounter = 0;
             }
             timerCounter++;
             execution.setVariable("timerCounter", timerCounter);
-            String message = URLDownloader.download(downloadUrl);
+//            String message = URLDownloader.download(downloadUrl);
+            String message = null;
             if (message == null || message.isEmpty()) {
                 log.warn("URLDownloader вернул пустую строку.  Активируем таймер.");
                 execution.setVariable("downloadSuccessful", false);

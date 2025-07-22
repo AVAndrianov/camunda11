@@ -7,7 +7,6 @@
     <bpmn:sequenceFlow id="SequenceFlow_01j7h8s" sourceRef="StartEvent_1" targetRef="Gateway_00czf7q" />
     <bpmn:serviceTask id="Activity_1" name="Stock Exchange" camunda:asyncBefore="true" camunda:exclusive="false" camunda:delegateExpression="${stockExchangeService}">
       <bpmn:incoming>Flow_1dzy8yi</bpmn:incoming>
-      <bpmn:outgoing>Flow_AfterServiceTask</bpmn:outgoing>
       <bpmn:outgoing>Flow_1lio3gd</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:userTask id="UserTask_1" name="Process Data" camunda:formKey="embedded:app:forms/filterForm.html" camunda:assignee="user">
@@ -25,7 +24,9 @@
       <bpmn:incoming>Flow_1vatr45</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_1vatr45" sourceRef="UserTask_1" targetRef="Event_0y7b8hs" />
-    <bpmn:sequenceFlow id="Flow_AfterServiceTask" sourceRef="Activity_1" targetRef="UserTask_1" />
+    <bpmn:sequenceFlow id="Flow_AfterServiceTask" sourceRef="Gateway_086wovc" targetRef="UserTask_1">
+      <bpmn:extensionElements />
+    </bpmn:sequenceFlow>
     <bpmn:exclusiveGateway id="Gateway_00czf7q">
       <bpmn:incoming>SequenceFlow_01j7h8s</bpmn:incoming>
       <bpmn:incoming>Flow_0zrsq1w</bpmn:incoming>
@@ -37,7 +38,7 @@
       <bpmn:outgoing>Flow_0m8tw0e</bpmn:outgoing>
     </bpmn:sendTask>
     <bpmn:sequenceFlow id="Flow_0zrsq1w" sourceRef="TimerEvent_1" targetRef="Gateway_00czf7q" />
-    <bpmn:boundaryEvent id="Event_1955j65" attachedToRef="Activity_1">
+    <bpmn:boundaryEvent id="Event_1955j65" camunda:asyncBefore="true" attachedToRef="Activity_1">
       <bpmn:outgoing>Flow_1vgi2bj</bpmn:outgoing>
       <bpmn:conditionalEventDefinition id="ConditionalEventDefinition_07vm7x6">
         <bpmn:condition xsi:type="bpmn:tFormalExpression">${execution.getVariable('timerCounter')&gt;2}</bpmn:condition>
@@ -48,17 +49,25 @@
       <bpmn:extensionElements>
         <camunda:failedJobRetryTimeCycle />
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_1lio3gd</bpmn:incoming>
+      <bpmn:incoming>Flow_0s7dv78</bpmn:incoming>
       <bpmn:outgoing>Flow_0zrsq1w</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_1ttq2gd">
         <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT30S</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:intermediateCatchEvent>
-    <bpmn:sequenceFlow id="Flow_1lio3gd" sourceRef="Activity_1" targetRef="TimerEvent_1" />
+    <bpmn:sequenceFlow id="Flow_1lio3gd" sourceRef="Activity_1" targetRef="Gateway_086wovc" />
     <bpmn:endEvent id="Event_0orv2kr" name="End Process">
       <bpmn:incoming>Flow_0m8tw0e</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_0m8tw0e" sourceRef="Activity_0wbjepy" targetRef="Event_0orv2kr" />
+    <bpmn:exclusiveGateway id="Gateway_086wovc" default="Flow_AfterServiceTask">
+      <bpmn:incoming>Flow_1lio3gd</bpmn:incoming>
+      <bpmn:outgoing>Flow_AfterServiceTask</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0s7dv78</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0s7dv78" sourceRef="Gateway_086wovc" targetRef="TimerEvent_1">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!execution.getVariable('downloadSuccessful')}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
   </bpmn:process>
   <bpmn:message id="Message_1" name="startProcess" />
   <bpmn:error id="Error_0v4r9x3" name="debitFailed" errorCode="debitFailed" />
@@ -76,70 +85,76 @@
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="UserTask_1_di" bpmnElement="UserTask_1">
-        <dc:Bounds x="470" y="77" width="100" height="80" />
+        <dc:Bounds x="480" y="180" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0y7b8hs_di" bpmnElement="Event_0y7b8hs">
-        <dc:Bounds x="612" y="99" width="36" height="36" />
+        <dc:Bounds x="612" y="202" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="600" y="142" width="63" height="14" />
+          <dc:Bounds x="600" y="245" width="63" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_00czf7q_di" bpmnElement="Gateway_00czf7q" isMarkerVisible="true">
         <dc:Bounds x="245" y="92" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1sgk1wd_di" bpmnElement="Activity_0wbjepy">
-        <dc:Bounds x="470" y="180" width="100" height="80" />
+        <dc:Bounds x="480" y="77" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0un3ktp_di" bpmnElement="TimerEvent_1">
-        <dc:Bounds x="362" y="202" width="36" height="36" />
+        <dc:Bounds x="292" y="202" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="348" y="248" width="64" height="14" />
+          <dc:Bounds x="278" y="248" width="64" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1un6tvd" bpmnElement="Event_0orv2kr">
-        <dc:Bounds x="612" y="202" width="36" height="36" />
+        <dc:Bounds x="612" y="99" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="600" y="245" width="63" height="14" />
+          <dc:Bounds x="600" y="142" width="63" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_086wovc_di" bpmnElement="Gateway_086wovc" isMarkerVisible="true">
+        <dc:Bounds x="355" y="195" width="50" height="50" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1955j65_di" bpmnElement="Event_1955j65">
-        <dc:Bounds x="412" y="139" width="36" height="36" />
+        <dc:Bounds x="412" y="99" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_01j7h8s_di" bpmnElement="SequenceFlow_01j7h8s">
         <di:waypoint x="208" y="117" />
         <di:waypoint x="245" y="117" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1vatr45_di" bpmnElement="Flow_1vatr45">
-        <di:waypoint x="570" y="117" />
-        <di:waypoint x="612" y="117" />
+        <di:waypoint x="580" y="220" />
+        <di:waypoint x="612" y="220" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_AfterServiceTask_di" bpmnElement="Flow_AfterServiceTask">
-        <di:waypoint x="430" y="117" />
-        <di:waypoint x="470" y="117" />
+        <di:waypoint x="405" y="220" />
+        <di:waypoint x="480" y="220" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1dzy8yi_di" bpmnElement="Flow_1dzy8yi">
         <di:waypoint x="295" y="117" />
         <di:waypoint x="330" y="117" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0zrsq1w_di" bpmnElement="Flow_0zrsq1w">
-        <di:waypoint x="362" y="220" />
+        <di:waypoint x="292" y="220" />
         <di:waypoint x="270" y="220" />
         <di:waypoint x="270" y="142" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1vgi2bj_di" bpmnElement="Flow_1vgi2bj">
-        <di:waypoint x="430" y="175" />
-        <di:waypoint x="430" y="220" />
-        <di:waypoint x="470" y="220" />
+        <di:waypoint x="448" y="117" />
+        <di:waypoint x="480" y="117" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1lio3gd_di" bpmnElement="Flow_1lio3gd">
         <di:waypoint x="380" y="157" />
-        <di:waypoint x="380" y="202" />
+        <di:waypoint x="380" y="195" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0m8tw0e_di" bpmnElement="Flow_0m8tw0e">
-        <di:waypoint x="570" y="220" />
-        <di:waypoint x="612" y="220" />
+        <di:waypoint x="580" y="117" />
+        <di:waypoint x="612" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0s7dv78_di" bpmnElement="Flow_0s7dv78">
+        <di:waypoint x="355" y="220" />
+        <di:waypoint x="328" y="220" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
