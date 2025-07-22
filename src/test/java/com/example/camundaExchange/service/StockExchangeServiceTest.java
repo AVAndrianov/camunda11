@@ -30,7 +30,7 @@ public class StockExchangeServiceTest {
 
     private StockExchangeService service;
 
-    private String downloadUrl = "https://test";
+    private final String downloadUrl = "https://test";
 
     @BeforeEach
     public void setUp() {
@@ -87,7 +87,6 @@ public class StockExchangeServiceTest {
             verify(execution, never()).setVariable(eq("filterMessage"), anyString());
         }
     }
-
 
     @Test
     public void testExecute_withInvalidJson_setsFalse() {
