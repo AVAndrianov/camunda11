@@ -9,6 +9,8 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -46,7 +48,7 @@ public class StockExchangeServiceTest {
     }
 
     @Test
-    public void testExecute_withValidData_filtersCorrectly() {
+    public void testExecute_withValidData_filtersCorrectly() throws IOException {
         try (MockedStatic<URLDownloader> mockedDownloader = mockStatic(URLDownloader.class)) {
             String jsonResponse = "{ \"records\": [" +
                     "{\"BlockDate\": \"\", \"INN\": \"7700000000\", \"Name\": \"Компания\"}," +

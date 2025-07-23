@@ -1,5 +1,6 @@
 package com.example.camundaExchange.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -10,9 +11,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- • Утилитарный класс для загрузки данных с URL.
+ * • Утилитарный класс для загрузки данных с URL.
  */
 @Component
+@Slf4j
 public class URLDownloader {
 
     /**
@@ -22,25 +24,26 @@ public class URLDownloader {
      * @return Строка, содержащая данные, загруженные с URL, или null в случае ошибки.
      * @throws IOException В случае ошибок при подключении или чтении данных с URL.
      */
-    public static String download(String urlString) {
+
+    public static String download(String urlString) throws IOException {
         StringBuilder result = new StringBuilder();
         try {
             URL url = new URL(urlString);
-            InputStream inputStream = url.openStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                result.append(line).append('\n');
-                System.out.println(line);
-                break;
+            try (InputStream inputStream = url.openStream();
+                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    result.append(line).append('\n');
+                    log.info(line);
+                    break;
+                }
             }
-            reader.close();
-            inputStream.close();
-
         } catch (MalformedURLException e) {
-            System.err.println("Некорректный URL: " + e.getMessage());
+            log.error("Некорректный URL: " + e.getMessage(), e);
+            throw e;
         } catch (IOException e) {
-            System.err.println("Ошибка при загрузке данных: " + e.getMessage());
+            log.error("Ошибка при загрузке данных: " + e.getMessage(), e);
+            throw e;
         }
         return result.toString();
     }
