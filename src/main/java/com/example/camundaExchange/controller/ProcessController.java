@@ -20,7 +20,7 @@ import java.io.ByteArrayInputStream;
  */
 @RestController
 @RequestMapping("/otc/lookup-table")
-public class Controller {
+public class ProcessController {
     /**
      * Сервис времени выполнения Camunda, используемый для управления экземплярами процессов.
      */

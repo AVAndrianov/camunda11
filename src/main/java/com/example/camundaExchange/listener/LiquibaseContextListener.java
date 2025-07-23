@@ -1,4 +1,4 @@
-package com.example.camundaExchange.configuration;
+package com.example.camundaExchange.listener;
 
 import liquibase.integration.spring.SpringLiquibase;
 import org.slf4j.Logger;

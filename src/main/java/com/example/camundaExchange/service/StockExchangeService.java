@@ -1,6 +1,6 @@
 package com.example.camundaExchange.service;
 
-import com.example.camundaExchange.model.JsonMapper;
+import com.example.camundaExchange.model.OrganizationData;
 import com.example.camundaExchange.util.URLDownloader;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,7 +51,7 @@ public class StockExchangeService implements JavaDelegate {
             }
 
             ObjectMapper objectMapper = new ObjectMapper();
-            JsonMapper.Response elements = objectMapper.readValue(message, JsonMapper.Response.class);
+            OrganizationData.Response elements = objectMapper.readValue(message, OrganizationData.Response.class);
             elements.records = elements.records.stream().filter(
                             i -> Objects.equals(i.BlockDate, "")
                                     && i.INN.startsWith("77")
@@ -75,13 +75,13 @@ public class StockExchangeService implements JavaDelegate {
     }
 
     /**
-     * Преобразует объект {@link JsonMapper.Response} в JSON строку.
+     * Преобразует объект {@link OrganizationData.Response} в JSON строку.
      *
-     * @param response Объект {@link JsonMapper.Response} для преобразования.
+     * @param response Объект {@link OrganizationData.Response} для преобразования.
      * @return JSON строка, представляющая объект.
      * @throws JsonProcessingException В случае ошибки при преобразовании в JSON.
      */
-    public static String toJson(JsonMapper.Response response) throws JsonProcessingException {
+    public static String toJson(OrganizationData.Response response) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.writeValueAsString(response);
     }

@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Класс для маппинга JSON ответа с данными об участниках торгов.
  */
-public class JsonMapper implements Serializable {
+public class OrganizationData implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
