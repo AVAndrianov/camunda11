@@ -34,8 +34,8 @@ public class LiquibaseConfig {
     public SpringLiquibase liquibase() {
         SpringLiquibase liquibase = new SpringLiquibase();
         liquibase.setDataSource(dataSource);
-        liquibase.setChangeLog("classpath:db/changelog/db.changelog-master.xml"); // Укажите путь к вашему changelog
-        liquibase.setShouldRun(false); // Важно!  Не запускать автоматически
+        liquibase.setChangeLog("classpath:db/changelog/db.changelog-master.xml");
+        liquibase.setShouldRun(false);
         return liquibase;
     }
 }
