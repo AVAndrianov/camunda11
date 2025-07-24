@@ -23,7 +23,6 @@ public class StockExchangeService implements JavaDelegate {
     /**
      * URL для загрузки данных с фондовой биржи.
      */
-
     @Autowired
     private GetDataService getDataService;
 
@@ -51,7 +50,6 @@ public class StockExchangeService implements JavaDelegate {
                 execution.setVariable("downloadSuccessful", false);
                 return;
             }
-
 
             ObjectMapper objectMapper = new ObjectMapper();
             OrganizationData.Response elements = objectMapper.readValue(message, OrganizationData.Response.class);
