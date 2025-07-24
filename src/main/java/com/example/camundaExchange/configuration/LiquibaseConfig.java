@@ -22,6 +22,11 @@ public class LiquibaseConfig {
      */
     @Autowired
     private DataSource dataSource;
+    /**
+     * Путь к файлу changelog Liquibase, содержащему описание миграций.
+     */
+    @Autowired
+    private String liquibaseChangeLog;
 
     /**
      * Создает и настраивает бин {@link SpringLiquibase}.
@@ -34,7 +39,7 @@ public class LiquibaseConfig {
     public SpringLiquibase liquibase() {
         SpringLiquibase liquibase = new SpringLiquibase();
         liquibase.setDataSource(dataSource);
-        liquibase.setChangeLog("classpath:db/changelog/db.changelog-master.xml");
+        liquibase.setChangeLog(liquibaseChangeLog);
         liquibase.setShouldRun(false);
         return liquibase;
     }
