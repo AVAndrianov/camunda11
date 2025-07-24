@@ -42,4 +42,7 @@
 
 ## API эндпоинты
 
+- **POST /auth/sign-up:** Регистрация нового пользователя.
+- **POST /auth/sign-in:** Авторизация пользователя.
 - **GET /otc/lookup-table/startProcessUrl** Запускает бп. Данные для обработки будут получены по url: `https://api.spimex.com/otc/lookup-tables/1` в блоке Stock Exchange
+

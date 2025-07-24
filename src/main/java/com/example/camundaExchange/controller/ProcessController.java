@@ -7,12 +7,16 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.ByteArrayInputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * REST-контроллер для управления процессами Camunda и предоставления доступа к данным.
@@ -34,7 +38,11 @@ public class ProcessController {
      */
     @GetMapping("/startProcess")
     public ResponseEntity<String> startProcessGet() {
-        ProcessInstance processInstance = runtimeService.startProcessInstanceByMessage("startProcess");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Map<String, Object> variables = new HashMap<>();
+        String currentUser = auth.getName(); // имя пользователя
+        variables.put("assignee", currentUser);
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByMessage("startProcess", variables);
         return ResponseEntity.ok("Процесс запущен: " + processInstance.getProcessInstanceId());
     }
 

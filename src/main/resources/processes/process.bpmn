@@ -9,7 +9,7 @@
       <bpmn:incoming>Flow_1dzy8yi</bpmn:incoming>
       <bpmn:outgoing>Flow_1lio3gd</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:userTask id="UserTask_1" name="Process Data" camunda:formKey="embedded:app:forms/filterForm.html" camunda:assignee="user">
+    <bpmn:userTask id="UserTask_1" name="Process Data" camunda:formKey="embedded:app:forms/filterForm.html" camunda:assignee="${assignee}">
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="recordCount">${execution.getVariable('count')}</camunda:inputParameter>

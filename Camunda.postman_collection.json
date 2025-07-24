@@ -11,12 +11,19 @@
 			"name": "StartProcessUrl",
 			"request": {
 				"auth": {
-					"type": "noauth"
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
 				},
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/otc/lookup-table/startProcessUrl?url=https://api.spimex.com/otc/lookup-tables/1",
+					"raw": "http://localhost:8080/otc/lookup-table/startProcess",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -25,13 +32,80 @@
 					"path": [
 						"otc",
 						"lookup-table",
-						"startProcessUrl"
-					],
-					"query": [
-						{
-							"key": "url",
-							"value": "https://api.spimex.com/otc/lookup-tables/1"
+						"startProcess"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "sing-up",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"User1\",\n    \"email\": \"User1@example.com\",\n    \"password\": \"useruser\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
 						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/auth/sign-up",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"auth",
+						"sign-up"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "sing-in",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"",
+							"\t\t\t\tvar res = pm.response.json();",
+							"\t\t\t\tpm.environment.set(\"token\",res.token);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"User1\",\n    \"password\": \"useruser\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/auth/sign-in",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"auth",
+						"sign-in"
 					]
 				}
 			},
