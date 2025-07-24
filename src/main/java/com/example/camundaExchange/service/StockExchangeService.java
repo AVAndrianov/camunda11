@@ -1,7 +1,6 @@
 package com.example.camundaExchange.service;
 
 import com.example.camundaExchange.model.OrganizationData;
-import com.example.camundaExchange.util.URLDownloader;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -24,8 +23,9 @@ public class StockExchangeService implements JavaDelegate {
     /**
      * URL для загрузки данных с фондовой биржи.
      */
+
     @Autowired
-    private String downloadUrl;
+    private GetDataService getDataService;
 
     /**
      * Выполняет логику получения, фильтрации и обработки данных с фондовой биржи.
@@ -43,12 +43,15 @@ public class StockExchangeService implements JavaDelegate {
             }
             timerCounter++;
             execution.setVariable("timerCounter", timerCounter);
-            String message = URLDownloader.download(downloadUrl);
+
+            getDataService.fetchAndSaveData();
+            String message = getDataService.getAllResponses().get(0).getJsonData();
             if (message == null || message.isEmpty()) {
-                log.warn("URLDownloader вернул пустую строку.  Активируем таймер.");
+                log.warn("Вернулась пустая строка.  Активируем таймер.");
                 execution.setVariable("downloadSuccessful", false);
                 return;
             }
+
 
             ObjectMapper objectMapper = new ObjectMapper();
             OrganizationData.Response elements = objectMapper.readValue(message, OrganizationData.Response.class);
