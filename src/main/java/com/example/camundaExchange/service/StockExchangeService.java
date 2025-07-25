@@ -3,12 +3,11 @@ package com.example.camundaExchange.service;
 import com.example.camundaExchange.model.OrganizationData;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -36,6 +35,7 @@ public class StockExchangeService implements JavaDelegate {
      * @throws Exception В случае ошибок при загрузке или обработке данных.
      */
     @Override
+    @Transactional
     public void execute(DelegateExecution execution) {
         try {
             Integer timerCounter = (Integer) execution.getVariable("timerCounter");

@@ -40,7 +40,7 @@ public class ProcessController {
     public ResponseEntity<String> startProcessGet() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Map<String, Object> variables = new HashMap<>();
-        String currentUser = auth.getName(); // имя пользователя
+        String currentUser = auth.getName();
         variables.put("assignee", currentUser);
         ProcessInstance processInstance = runtimeService.startProcessInstanceByMessage("startProcess", variables);
         return ResponseEntity.ok("Процесс запущен: " + processInstance.getProcessInstanceId());
