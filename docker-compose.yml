@@ -1,0 +1,88 @@
+services:
+  node3:
+    image: exchange/11:5.2.9
+    container_name: exchange_529
+    build: .
+    ports:
+      - "8080:8080"
+#    environment:
+#      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/template1
+#      - SPRING_DATASOURCE_USERNAME=postgres
+#      - SPRING_DATASOURCE_PASSWORD=123
+#    depends_on:
+#      - postgres_db
+#    networks:
+#      - mynetwork
+#  postgres_db:
+#    image: postgres:16
+#    container_name: postgres-db-container_529
+#    ports:
+#      - "5432:5432"
+#    volumes:
+#      - ./postgres-data:/opt/postgres-data
+#    environment:
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: 123
+#      POSTGRES_DB: template1
+#    restart: always
+#volumes:
+#  postgres_data:
+#networks:
+#  mynetwork:
+#    driver: bridge
+
+
+#
+#services:
+#  app:
+#    image: camunda/11:1.0.2
+#    build: .
+#    ports:
+#      - "8080:8080"
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:h2:file:/h2-data/camunda;DB_CLOSE_DELAY=-1
+#    volumes:
+#      - ./h2-data:/h2-data
+##    depends_on:
+##      - db (если есть внешняя БД)
+#
+#  # Можно убрать отдельный сервис db, если только H2
+#
+#version: "3.8"
+#
+#services:
+#  db:
+#    image: postgres:15  # Используйте нужный образ базы данных
+#    container_name: postgres_db
+#    environment:
+#      POSTGRES_USER: your_user
+#      POSTGRES_PASSWORD: your_password
+#      POSTGRES_DB: your_db
+#    ports:
+#      - "5432:5432"  # Опубликуйте порт, если нужен доступ извне
+#    volumes:
+#      - db_data:/var/lib/postgresql/data  # Том для сохранения данных
+#    networks:
+#      - mynetwork
+#
+#  app:
+#    image: your-spring-boot-app:latest  # Замените на имя вашего образа
+#    container_name: spring_boot_app
+#    ports:
+#      - "8080:8080"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: docker  # Активный профиль Spring Boot
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/your_db  # Используйте имя сервиса 'db'
+#      SPRING_DATASOURCE_USERNAME: your_user
+#      SPRING_DATASOURCE_PASSWORD: your_password
+#    depends_on:
+#      - db  # Зависимость от сервиса базы данных
+#    networks:
+#      - mynetwork
+#
+#volumes:
+#  db_data:  # Определение тома
+#
+#networks:
+#  mynetwork:  # Определение сети
+#    driver: bridge
