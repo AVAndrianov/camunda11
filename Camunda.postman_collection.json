@@ -45,7 +45,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"username\": \"User1\",\n    \"email\": \"User1@example.com\",\n    \"password\": \"useruser\"\n}",
+					"raw": "{\n  \"id\": \"CamundaUser1\",\n  \"password\": \"Password\",\n  \"firstName\": \"John1\",\n  \"lastName\": \"Doe1\",\n  \"roles\": [\"camunda-admin\"]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -89,7 +89,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"username\": \"User1\",\n    \"password\": \"useruser\"\n}",
+					"raw": "{\n    \"username\": \"CamundaUser1\",\n    \"password\": \"Password\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
