@@ -3,14 +3,17 @@ package com.example.camundaExchange.service;
 import com.example.camundaExchange.model.OrganizationData;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 /**
@@ -19,8 +22,9 @@ import java.util.stream.Collectors;
  */
 @Service("stockExchangeService")
 @Slf4j
+@Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRES_NEW)
 public class StockExchangeService implements JavaDelegate {
-
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     /**
      * URL для загрузки данных с фондовой биржи.
      */
@@ -35,8 +39,8 @@ public class StockExchangeService implements JavaDelegate {
      * @throws Exception В случае ошибок при загрузке или обработке данных.
      */
     @Override
-    @Transactional
     public void execute(DelegateExecution execution) {
+        lock.writeLock().lock();
         try {
             Integer timerCounter = (Integer) execution.getVariable("timerCounter");
             if (timerCounter == null) {
@@ -45,8 +49,7 @@ public class StockExchangeService implements JavaDelegate {
             timerCounter++;
             execution.setVariable("timerCounter", timerCounter);
 
-            getDataService.fetchAndSaveData();
-            String message = getDataService.getAllResponses().get(0).getJsonData();
+            String message = getDataService.fetchAndSaveData();
             if (message == null || message.isEmpty()) {
                 log.warn("Вернулась пустая строка.  Активируем таймер.");
                 execution.setVariable("downloadSuccessful", false);
@@ -74,6 +77,8 @@ public class StockExchangeService implements JavaDelegate {
             log.error("Ошибка при загрузке данных: " + e.getMessage(), e);
             execution.setVariable("downloadSuccessful", false);
             return;
+        }finally {
+            lock.writeLock().unlock();
         }
     }
 

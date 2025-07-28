@@ -3,6 +3,9 @@ package com.example.camundaExchange.service;
 import com.example.camundaExchange.model.ApiResponseEntity;
 import com.example.camundaExchange.repository.ApiResponseRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -43,10 +46,12 @@ public class GetDataService {
     /**
      * Загружает данные с внешнего API и сохраняет их в базу данных.
      */
-    public void fetchAndSaveData() {
+    @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRES_NEW)
+    public String fetchAndSaveData() {
+        String response = null;
         try {
-            String response = restTemplate.getForObject(downloadUrl, String.class);
-            System.out.println("Полученный JSON: " + response);
+            response = restTemplate.getForObject(downloadUrl, String.class);
+            System.out.println("Полученный JSON: ");
 
             ApiResponseEntity entity = new ApiResponseEntity(response);
             repository.save(entity);
@@ -55,6 +60,7 @@ public class GetDataService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return response;
     }
 
     /**
@@ -62,6 +68,7 @@ public class GetDataService {
      *
      * @return список всех ответов API, сохранённых в базе.
      */
+    @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRES_NEW)
     public List<ApiResponseEntity> getAllResponses() {
         return repository.findAll();
     }
