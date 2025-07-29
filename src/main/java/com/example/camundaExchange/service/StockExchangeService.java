@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * • Сервис для получения данных с фондовой биржи, фильтрации и установки переменных процесса.
  * • Реализует интерфейс {@link JavaDelegate} для интеграции с Camunda BPM.
  */
-@Service("stockExchangeService")
+@Service
 @Slf4j
 @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRES_NEW)
 public class StockExchangeService implements JavaDelegate {
@@ -59,9 +59,9 @@ public class StockExchangeService implements JavaDelegate {
             ObjectMapper objectMapper = new ObjectMapper();
             OrganizationData.Response elements = objectMapper.readValue(message, OrganizationData.Response.class);
             elements.records = elements.records.stream().filter(
-                            i -> Objects.equals(i.BlockDate, "")
-                                    && i.INN.startsWith("77")
-                                    && !i.Name.contains("ИП")
+                            item -> Objects.equals(item.BlockDate, "")
+                                    && item.INN.startsWith("77")
+                                    && !item.Name.contains("ИП")
                     )
                     .collect(Collectors.toList());
             execution.setVariable("filterMessage", toJson(elements));
@@ -72,12 +72,10 @@ public class StockExchangeService implements JavaDelegate {
         } catch (JsonProcessingException e) {
             log.error("Ошибка при парсинге JSON: " + e.getMessage(), e);
             execution.setVariable("downloadSuccessful", false);
-            return;
         } catch (Exception e) {
             log.error("Ошибка при загрузке данных: " + e.getMessage(), e);
             execution.setVariable("downloadSuccessful", false);
-            return;
-        }finally {
+        } finally {
             lock.writeLock().unlock();
         }
     }
@@ -89,7 +87,7 @@ public class StockExchangeService implements JavaDelegate {
      * @return JSON строка, представляющая объект.
      * @throws JsonProcessingException В случае ошибки при преобразовании в JSON.
      */
-    public static String toJson(OrganizationData.Response response) throws JsonProcessingException {
+    private static String toJson(OrganizationData.Response response) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.writeValueAsString(response);
     }
