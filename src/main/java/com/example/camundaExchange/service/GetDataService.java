@@ -2,13 +2,11 @@ package com.example.camundaExchange.service;
 
 import com.example.camundaExchange.model.ApiResponseEntity;
 import com.example.camundaExchange.repository.ApiResponseRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -18,6 +16,8 @@ import java.util.List;
  */
 @Service
 public class GetDataService {
+
+    private static final Logger logger = LoggerFactory.getLogger(GetDataService.class);
 
     /**
      * URL для загрузки данных.
@@ -40,44 +40,40 @@ public class GetDataService {
      * @param downloadUrl URL для загрузки данных.
      * @param repository  Репозиторий для работы с базой данных.
      */
-    public GetDataService(String downloadUrl, ApiResponseRepository repository) {
+    public GetDataService(String downloadUrl, ApiResponseRepository repository, RestTemplate restTemplate) {
         this.downloadUrl = downloadUrl;
         this.repository = repository;
-        this.restTemplate = new RestTemplate();
+        this.restTemplate = restTemplate;
     }
 
     /**
      * Загружает данные с внешнего API и сохраняет их в базу данных.
      */
-    @Async
-    @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRES_NEW)
     @Cacheable(value = "apiResponseCache", key = "'latestResponse'")
     public String fetchAndSaveData() {
-        String response = null;
-        try {
-            response = restTemplate.getForObject(downloadUrl, String.class);
-            System.out.println("Полученный JSON: ");
-
-            ApiResponseEntity entity = new ApiResponseEntity(response);
-            repository.save(entity);
-
-            System.out.println("Данные сохранены в базу");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return response;
+        logger.info("Получение данных по url");
+        return fetchAndSave();
     }
 
     @CachePut(value = "apiResponseCache", key = "'latestResponse'")
     public String refreshData() {
+        logger.info("Получение данных из кэша");
+        return fetchAndSave();
+    }
+
+    private String fetchAndSave() {
         String response = null;
         try {
             response = restTemplate.getForObject(downloadUrl, String.class);
-            ApiResponseEntity entity = new ApiResponseEntity(response);
-            repository.save(entity);
-            System.out.println("Кеш обновлен и данные сохранены");
+            if (response != null) {
+                ApiResponseEntity entity = new ApiResponseEntity(response);
+                repository.save(entity);
+                logger.info("Данные успешно получены и сохранены");
+            } else {
+                logger.warn("Получен пустой ответ от API");
+            }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Ошибка при получении данных", e);
         }
         return response;
     }
@@ -87,7 +83,6 @@ public class GetDataService {
      *
      * @return список всех ответов API, сохранённых в базе.
      */
-    @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRES_NEW)
     public List<ApiResponseEntity> getAllResponses() {
         return repository.findAll();
     }

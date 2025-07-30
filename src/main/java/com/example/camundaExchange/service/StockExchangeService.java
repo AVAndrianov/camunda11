@@ -8,12 +8,9 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 /**
@@ -22,10 +19,8 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-@Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRES_NEW)
 public class StockExchangeService implements JavaDelegate {
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     /**
      * URL для загрузки данных с фондовой биржи.
      */
@@ -41,13 +36,9 @@ public class StockExchangeService implements JavaDelegate {
      */
     @Override
     public void execute(DelegateExecution execution) {
-        lock.writeLock().lock();
         try {
             Integer timerCounter = (Integer) execution.getVariable("timerCounter");
-            if (timerCounter == null) {
-                timerCounter = 0;
-            }
-            timerCounter++;
+            timerCounter = (timerCounter == null) ? 1 : timerCounter + 1;
             execution.setVariable("timerCounter", timerCounter);
 
             String message = getDataService.fetchAndSaveData();
@@ -56,15 +47,8 @@ public class StockExchangeService implements JavaDelegate {
                 execution.setVariable("downloadSuccessful", false);
                 return;
             }
-
-//            ObjectMapper objectMapper = new ObjectMapper();
             OrganizationData.Response elements = objectMapper.readValue(message, OrganizationData.Response.class);
-            elements.records = elements.records.stream().filter(
-                            item -> Objects.equals(item.BlockDate, "")
-                                    && item.INN.startsWith("77")
-                                    && !item.Name.contains("ИП")
-                    )
-                    .collect(Collectors.toList());
+            elements.records = filterRecords(elements);
             execution.setVariable("filterMessage", toJson(elements));
             execution.setVariable("count", elements.records.size());
             execution.setVariable("downloadSuccessful", true);
@@ -76,8 +60,6 @@ public class StockExchangeService implements JavaDelegate {
         } catch (Exception e) {
             log.error("Ошибка при загрузке данных: " + e.getMessage(), e);
             execution.setVariable("downloadSuccessful", false);
-        } finally {
-            lock.writeLock().unlock();
         }
     }
 
@@ -89,7 +71,15 @@ public class StockExchangeService implements JavaDelegate {
      * @throws JsonProcessingException В случае ошибки при преобразовании в JSON.
      */
     private static String toJson(OrganizationData.Response response) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.writeValueAsString(response);
+    }
+
+    private List<OrganizationData.Record> filterRecords(OrganizationData.Response records) {
+        return records.records.stream().filter(
+                        item -> Objects.equals(item.BlockDate, "")
+                                && item.INN.startsWith("77")
+                                && !item.Name.contains("ИП")
+                )
+                .collect(Collectors.toList());
     }
 }
