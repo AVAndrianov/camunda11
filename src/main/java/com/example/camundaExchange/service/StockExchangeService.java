@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRES_NEW)
 public class StockExchangeService implements JavaDelegate {
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     /**
      * URL для загрузки данных с фондовой биржи.
@@ -56,7 +57,7 @@ public class StockExchangeService implements JavaDelegate {
                 return;
             }
 
-            ObjectMapper objectMapper = new ObjectMapper();
+//            ObjectMapper objectMapper = new ObjectMapper();
             OrganizationData.Response elements = objectMapper.readValue(message, OrganizationData.Response.class);
             elements.records = elements.records.stream().filter(
                             item -> Objects.equals(item.BlockDate, "")

@@ -2,6 +2,9 @@ package com.example.camundaExchange.service;
 
 import com.example.camundaExchange.model.ApiResponseEntity;
 import com.example.camundaExchange.repository.ApiResponseRepository;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -46,7 +49,9 @@ public class GetDataService {
     /**
      * Загружает данные с внешнего API и сохраняет их в базу данных.
      */
+    @Async
     @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRES_NEW)
+    @Cacheable(value = "apiResponseCache", key = "'latestResponse'")
     public String fetchAndSaveData() {
         String response = null;
         try {
@@ -57,6 +62,20 @@ public class GetDataService {
             repository.save(entity);
 
             System.out.println("Данные сохранены в базу");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return response;
+    }
+
+    @CachePut(value = "apiResponseCache", key = "'latestResponse'")
+    public String refreshData() {
+        String response = null;
+        try {
+            response = restTemplate.getForObject(downloadUrl, String.class);
+            ApiResponseEntity entity = new ApiResponseEntity(response);
+            repository.save(entity);
+            System.out.println("Кеш обновлен и данные сохранены");
         } catch (Exception e) {
             e.printStackTrace();
         }
