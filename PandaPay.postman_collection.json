@@ -1,8 +1,8 @@
 {
   "info": {
-    "name": "PandaPay Merchant API (skeleton)",
-    "_postman_id": "2e2b2fb2-7f9b-4ed8-a6a1-6a9f86a3b5a5",
-    "description": "Skeleton collection with HMAC pre-request signing. Replace paths and bodies once OpenAPI spec is available.",
+    "name": "PandaPay API V1",
+    "_postman_id": "7a0d6ee5-0d4b-4ba2-bdd9-3e6c2d7a9b0a",
+    "description": "REST API V1 for merchant operations. Requests must be signed with HMAC-SHA256. Headers: X-API-Key, X-Timestamp, X-Signature. Base: https://api.pandapay24.com/v1",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "event": [
@@ -18,47 +18,31 @@
           "    const url = pm.request.url;",
           "    const path = url.getPath();",
           "    const query = url.getQueryString() || '';",
-          "",
           "    let raw = '';",
           "    if (pm.request.body && pm.request.body.mode === 'raw') {",
           "      raw = pm.variables.replaceIn(pm.request.body.raw || '');",
           "    }",
-          "",
           "    const timestamp = Math.floor(Date.now() / 1000).toString();",
           "    pm.environment.set('X_Timestamp', timestamp);",
-          "",
           "    const keyId = pm.environment.get('KEY_ID') || pm.collectionVariables.get('KEY_ID') || '';",
           "    const secret = pm.environment.get('SECRET_KEY') || pm.collectionVariables.get('SECRET_KEY') || '';",
-          "",
           "    let bodyHashHex = '';",
           "    let signatureHex = '';",
-          "",
           "    if (cryptoAvailable) {",
           "      bodyHashHex = crypto.createHash('sha256').update(raw, 'utf8').digest('hex');",
           "      const canonical = [method, path, query, timestamp, bodyHashHex].join('\n');",
           "      signatureHex = crypto.createHmac('sha256', secret).update(canonical, 'utf8').digest('hex');",
           "    } else {",
-          "      // Fallback for limited environments (may not sign correctly)",
           "      const canonical = [method, path, query, timestamp, ''].join('\n');",
           "      signatureHex = canonical;",
           "    }",
-          "",
           "    pm.environment.set('signatureHex', signatureHex);",
-          "",
           "    pm.request.headers.upsert({ key: 'X-API-Key', value: keyId });",
           "    pm.request.headers.upsert({ key: 'X-Timestamp', value: timestamp });",
           "    pm.request.headers.upsert({ key: 'X-Signature', value: signatureHex });",
-          "",
           "    const token = (pm.environment.get('token') || '').trim();",
-          "    if (token) {",
-          "      pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
-          "    }",
-          "",
-          "    console.log('canonical components:', { method, path, query, timestamp, bodyHashHex });",
-          "    console.log('signatureHex:', signatureHex);",
-          "  } catch (e) {",
-          "    console.error('pre-request error:', e);",
-          "  }",
+          "    if (token) pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+          "  } catch (e) { console.error('pre-request error:', e); }",
           "})();"
         ]
       }
@@ -66,7 +50,7 @@
   ],
   "item": [
     {
-      "name": "Template GET (replace path)",
+      "name": "Balance History: GET /balance-history",
       "request": {
         "method": "GET",
         "header": [
@@ -75,17 +59,125 @@
           { "key": "X-Signature", "value": "{{signatureHex}}" }
         ],
         "url": {
-          "raw": "{{BASE_URL}}/replace-with-path?example=1",
+          "raw": "{{BASE_URL}}/balance-history?page={{page}}&per_page={{per_page}}&history_type={{history_type}}&from_date={{from_date}}&to_date={{to_date}}&order_id={{order_id}}",
           "host": ["{{BASE_URL}}"],
-          "path": ["replace-with-path"],
+          "path": ["balance-history"],
           "query": [
-            { "key": "example", "value": "1" }
+            { "key": "page", "value": "1" },
+            { "key": "per_page", "value": "10" },
+            { "key": "history_type", "value": "" },
+            { "key": "from_date", "value": "" },
+            { "key": "to_date", "value": "" },
+            { "key": "order_id", "value": "" }
           ]
         }
       }
     },
     {
-      "name": "Template POST (replace path + body)",
+      "name": "Disputes: GET /disputes",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-API-Key", "value": "{{KEY_ID}}" },
+          { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
+          { "key": "X-Signature", "value": "{{signatureHex}}" }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/disputes?page={{page}}&per_page={{per_page}}&status={{status}}",
+          "host": ["{{BASE_URL}}"],
+          "path": ["disputes"],
+          "query": [
+            { "key": "page", "value": "1" },
+            { "key": "per_page", "value": "10" },
+            { "key": "status", "value": "" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Disputes: POST /disputes (multipart)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-API-Key", "value": "{{KEY_ID}}" },
+          { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
+          { "key": "X-Signature", "value": "{{signatureHex}}" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "order_id", "type": "text", "value": "" },
+            { "key": "reason", "type": "text", "value": "amount_mismatch" },
+            { "key": "amount", "type": "text", "value": "" },
+            { "key": "details", "type": "text", "value": "" },
+            { "key": "evidence", "type": "file", "src": [] }
+          ]
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/disputes",
+          "host": ["{{BASE_URL}}"],
+          "path": ["disputes"]
+        }
+      }
+    },
+    {
+      "name": "Disputes: GET /disputes/{id}",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-API-Key", "value": "{{KEY_ID}}" },
+          { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
+          { "key": "X-Signature", "value": "{{signatureHex}}" }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/disputes/:id",
+          "host": ["{{BASE_URL}}"],
+          "path": ["disputes", ":id"]
+        }
+      }
+    },
+    {
+      "name": "Disputes: POST /disputes/{id}/reopen (multipart)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-API-Key", "value": "{{KEY_ID}}" },
+          { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
+          { "key": "X-Signature", "value": "{{signatureHex}}" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "evidence", "type": "file", "src": [] },
+            { "key": "details", "type": "text", "value": "" }
+          ]
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/disputes/:id/reopen",
+          "host": ["{{BASE_URL}}"],
+          "path": ["disputes", ":id", "reopen"]
+        }
+      }
+    },
+    {
+      "name": "Merchant: GET /merchants/user",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "X-API-Key", "value": "{{KEY_ID}}" },
+          { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
+          { "key": "X-Signature", "value": "{{signatureHex}}" }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/merchants/user",
+          "host": ["{{BASE_URL}}"],
+          "path": ["merchants", "user"]
+        }
+      }
+    },
+    {
+      "name": "Orders: POST /orders",
       "request": {
         "method": "POST",
         "header": [
@@ -94,14 +186,139 @@
           { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
           { "key": "X-Signature", "value": "{{signatureHex}}" }
         ],
-        "url": {
-          "raw": "{{BASE_URL}}/replace-with-path",
-          "host": ["{{BASE_URL}}"],
-          "path": ["replace-with-path"]
-        },
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"example\": true\n}\n"
+          "raw": "{\n  \"amount\": \"100.00\",\n  \"requisite_type\": \"SBP\",\n  \"idempotency_key\": \"{{idempotency_key}}\",\n  \"currency\": \"RUB\",\n  \"merchant_order_id\": \"TEST-123\"\n}\n"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/orders",
+          "host": ["{{BASE_URL}}"],
+          "path": ["orders"]
+        }
+      }
+    },
+    {
+      "name": "Orders: GET /orders/merchant/{id}",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-API-Key", "value": "{{KEY_ID}}" },
+          { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
+          { "key": "X-Signature", "value": "{{signatureHex}}" }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/orders/merchant/:id",
+          "host": ["{{BASE_URL}}"],
+          "path": ["orders", "merchant", ":id"]
+        }
+      }
+    },
+    {
+      "name": "Orders: GET /orders/stats",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "X-API-Key", "value": "{{KEY_ID}}" },
+          { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
+          { "key": "X-Signature", "value": "{{signatureHex}}" }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/orders/stats?country_code={{country_code}}&req_type={{req_type}}&from_date={{from_date}}&to_date={{to_date}}",
+          "host": ["{{BASE_URL}}"],
+          "path": ["orders", "stats"],
+          "query": [
+            { "key": "country_code", "value": "" },
+            { "key": "req_type", "value": "" },
+            { "key": "from_date", "value": "" },
+            { "key": "to_date", "value": "" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Orders: GET /orders/{id}",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-API-Key", "value": "{{KEY_ID}}" },
+          { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
+          { "key": "X-Signature", "value": "{{signatureHex}}" }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/orders/:id",
+          "host": ["{{BASE_URL}}"],
+          "path": ["orders", ":id"]
+        }
+      }
+    },
+    {
+      "name": "Orders: GET /orders/{id}/cancel",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-API-Key", "value": "{{KEY_ID}}" },
+          { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
+          { "key": "X-Signature", "value": "{{signatureHex}}" }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/orders/:id/cancel",
+          "host": ["{{BASE_URL}}"],
+          "path": ["orders", ":id", "cancel"]
+        }
+      }
+    },
+    {
+      "name": "Orders: GET /orders/{id}/confirm",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-API-Key", "value": "{{KEY_ID}}" },
+          { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
+          { "key": "X-Signature", "value": "{{signatureHex}}" }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/orders/:id/confirm",
+          "host": ["{{BASE_URL}}"],
+          "path": ["orders", ":id", "confirm"]
+        }
+      }
+    },
+    {
+      "name": "Disputes: GET /orders/{id}/disputes (by OrderID)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-API-Key", "value": "{{KEY_ID}}" },
+          { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
+          { "key": "X-Signature", "value": "{{signatureHex}}" }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/orders/:id/disputes",
+          "host": ["{{BASE_URL}}"],
+          "path": ["orders", ":id", "disputes"]
+        }
+      }
+    },
+    {
+      "name": "Orders: POST /orders/{id}/receipt (multipart)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-API-Key", "value": "{{KEY_ID}}" },
+          { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
+          { "key": "X-Signature", "value": "{{signatureHex}}" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "receipt", "type": "file", "src": [] }
+          ]
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/orders/:id/receipt",
+          "host": ["{{BASE_URL}}"],
+          "path": ["orders", ":id", "receipt"]
         }
       }
     }
