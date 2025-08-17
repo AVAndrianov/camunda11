@@ -2,7 +2,7 @@
   "info": {
     "name": "PandaPay API V1",
     "_postman_id": "7a0d6ee5-0d4b-4ba2-bdd9-3e6c2d7a9b0a",
-    "description": "REST API V1 for merchant operations. Requests must be signed with HMAC-SHA256. Headers: X-API-Key, X-Timestamp, X-Signature. Base: https://api.pandapay24.com/v1",
+    "description": "REST API V1 for merchant operations. HMAC-SHA256 signing required (X-API-Key, X-Timestamp, X-Signature). Base: https://api.pandapay24.com/v1",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "event": [
@@ -14,7 +14,7 @@
           "(() => {",
           "  try {",
           "    const url = pm.request.url;",
-          "    const path = url.getPath();",
+          "    const path = (typeof url === 'string') ? new URL(url.replace('{{BASE_URL}}', pm.environment.get('BASE_URL')||'' )).pathname : url.getPath();",
           "    const timestamp = Math.floor(Date.now() / 1000).toString();",
           "    pm.environment.set('X_Timestamp', timestamp);",
           "    const keyId = pm.environment.get('KEY_ID') || pm.collectionVariables.get('KEY_ID') || '';",
@@ -24,7 +24,6 @@
           "      raw = pm.variables.replaceIn(pm.request.body.raw || '');",
           "    }",
           "    let stringToSign = '';",
-          "    // Signing rules: multipart -> timestamp+path; JSON body -> timestamp+raw; no body -> timestamp only",
           "    if (pm.request.body && pm.request.body.mode === 'formdata') {",
           "      stringToSign = timestamp + path;",
           "    } else if (raw) {",
@@ -58,19 +57,7 @@
           { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
           { "key": "X-Signature", "value": "{{signatureHex}}" }
         ],
-        "url": {
-          "raw": "{{BASE_URL}}/balance-history?page={{page}}&per_page={{per_page}}&history_type={{history_type}}&from_date={{from_date}}&to_date={{to_date}}&order_id={{order_id}}",
-          "host": ["{{BASE_URL}}"],
-          "path": ["balance-history"],
-          "query": [
-            { "key": "page", "value": "1" },
-            { "key": "per_page", "value": "10" },
-            { "key": "history_type", "value": "" },
-            { "key": "from_date", "value": "" },
-            { "key": "to_date", "value": "" },
-            { "key": "order_id", "value": "" }
-          ]
-        }
+        "url": "{{BASE_URL}}/balance-history?page={{page}}&per_page={{per_page}}&history_type={{history_type}}&from_date={{from_date}}&to_date={{to_date}}&order_id={{order_id}}"
       }
     },
     {
@@ -82,16 +69,7 @@
           { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
           { "key": "X-Signature", "value": "{{signatureHex}}" }
         ],
-        "url": {
-          "raw": "{{BASE_URL}}/disputes?page={{page}}&per_page={{per_page}}&status={{status}}",
-          "host": ["{{BASE_URL}}"],
-          "path": ["disputes"],
-          "query": [
-            { "key": "page", "value": "1" },
-            { "key": "per_page", "value": "10" },
-            { "key": "status", "value": "" }
-          ]
-        }
+        "url": "{{BASE_URL}}/disputes?page={{page}}&per_page={{per_page}}&status={{status}}"
       }
     },
     {
@@ -110,14 +88,10 @@
             { "key": "reason", "type": "text", "value": "amount_mismatch" },
             { "key": "amount", "type": "text", "value": "" },
             { "key": "details", "type": "text", "value": "" },
-            { "key": "evidence", "type": "file", "src": [] }
+            { "key": "evidence", "type": "file", "src": "" }
           ]
         },
-        "url": {
-          "raw": "{{BASE_URL}}/disputes",
-          "host": ["{{BASE_URL}}"],
-          "path": ["disputes"]
-        }
+        "url": "{{BASE_URL}}/disputes"
       }
     },
     {
@@ -129,11 +103,7 @@
           { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
           { "key": "X-Signature", "value": "{{signatureHex}}" }
         ],
-        "url": {
-          "raw": "{{BASE_URL}}/disputes/:id",
-          "host": ["{{BASE_URL}}"],
-          "path": ["disputes", ":id"]
-        }
+        "url": "{{BASE_URL}}/disputes/{{id}}"
       }
     },
     {
@@ -148,15 +118,11 @@
         "body": {
           "mode": "formdata",
           "formdata": [
-            { "key": "evidence", "type": "file", "src": [] },
+            { "key": "evidence", "type": "file", "src": "" },
             { "key": "details", "type": "text", "value": "" }
           ]
         },
-        "url": {
-          "raw": "{{BASE_URL}}/disputes/:id/reopen",
-          "host": ["{{BASE_URL}}"],
-          "path": ["disputes", ":id", "reopen"]
-        }
+        "url": "{{BASE_URL}}/disputes/{{id}}/reopen"
       }
     },
     {
@@ -169,11 +135,7 @@
           { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
           { "key": "X-Signature", "value": "{{signatureHex}}" }
         ],
-        "url": {
-          "raw": "{{BASE_URL}}/merchants/user",
-          "host": ["{{BASE_URL}}"],
-          "path": ["merchants", "user"]
-        }
+        "url": "{{BASE_URL}}/merchants/user"
       }
     },
     {
@@ -190,11 +152,7 @@
           "mode": "raw",
           "raw": "{\n  \"amount\": \"100.00\",\n  \"requisite_type\": \"SBP\",\n  \"idempotency_key\": \"{{idempotency_key}}\",\n  \"currency\": \"RUB\",\n  \"merchant_order_id\": \"TEST-123\"\n}\n"
         },
-        "url": {
-          "raw": "{{BASE_URL}}/orders",
-          "host": ["{{BASE_URL}}"],
-          "path": ["orders"]
-        }
+        "url": "{{BASE_URL}}/orders"
       }
     },
     {
@@ -206,11 +164,7 @@
           { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
           { "key": "X-Signature", "value": "{{signatureHex}}" }
         ],
-        "url": {
-          "raw": "{{BASE_URL}}/orders/merchant/:id",
-          "host": ["{{BASE_URL}}"],
-          "path": ["orders", "merchant", ":id"]
-        }
+        "url": "{{BASE_URL}}/orders/merchant/{{id}}"
       }
     },
     {
@@ -223,17 +177,7 @@
           { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
           { "key": "X-Signature", "value": "{{signatureHex}}" }
         ],
-        "url": {
-          "raw": "{{BASE_URL}}/orders/stats?country_code={{country_code}}&req_type={{req_type}}&from_date={{from_date}}&to_date={{to_date}}",
-          "host": ["{{BASE_URL}}"],
-          "path": ["orders", "stats"],
-          "query": [
-            { "key": "country_code", "value": "" },
-            { "key": "req_type", "value": "" },
-            { "key": "from_date", "value": "" },
-            { "key": "to_date", "value": "" }
-          ]
-        }
+        "url": "{{BASE_URL}}/orders/stats?country_code={{country_code}}&req_type={{req_type}}&from_date={{from_date}}&to_date={{to_date}}"
       }
     },
     {
@@ -245,11 +189,7 @@
           { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
           { "key": "X-Signature", "value": "{{signatureHex}}" }
         ],
-        "url": {
-          "raw": "{{BASE_URL}}/orders/:id",
-          "host": ["{{BASE_URL}}"],
-          "path": ["orders", ":id"]
-        }
+        "url": "{{BASE_URL}}/orders/{{id}}"
       }
     },
     {
@@ -261,11 +201,7 @@
           { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
           { "key": "X-Signature", "value": "{{signatureHex}}" }
         ],
-        "url": {
-          "raw": "{{BASE_URL}}/orders/:id/cancel",
-          "host": ["{{BASE_URL}}"],
-          "path": ["orders", ":id", "cancel"]
-        }
+        "url": "{{BASE_URL}}/orders/{{id}}/cancel"
       }
     },
     {
@@ -277,15 +213,11 @@
           { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
           { "key": "X-Signature", "value": "{{signatureHex}}" }
         ],
-        "url": {
-          "raw": "{{BASE_URL}}/orders/:id/confirm",
-          "host": ["{{BASE_URL}}"],
-          "path": ["orders", ":id", "confirm"]
-        }
+        "url": "{{BASE_URL}}/orders/{{id}}/confirm"
       }
     },
     {
-      "name": "Disputes: GET /orders/{id}/disputes (by OrderID)",
+      "name": "Disputes: GET /orders/{id}/disputes",
       "request": {
         "method": "GET",
         "header": [
@@ -293,11 +225,7 @@
           { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
           { "key": "X-Signature", "value": "{{signatureHex}}" }
         ],
-        "url": {
-          "raw": "{{BASE_URL}}/orders/:id/disputes",
-          "host": ["{{BASE_URL}}"],
-          "path": ["orders", ":id", "disputes"]
-        }
+        "url": "{{BASE_URL}}/orders/{{id}}/disputes"
       }
     },
     {
@@ -312,14 +240,10 @@
         "body": {
           "mode": "formdata",
           "formdata": [
-            { "key": "receipt", "type": "file", "src": [] }
+            { "key": "receipt", "type": "file", "src": "" }
           ]
         },
-        "url": {
-          "raw": "{{BASE_URL}}/orders/:id/receipt",
-          "host": ["{{BASE_URL}}"],
-          "path": ["orders", ":id", "receipt"]
-        }
+        "url": "{{BASE_URL}}/orders/{{id}}/receipt"
       }
     }
   ]
