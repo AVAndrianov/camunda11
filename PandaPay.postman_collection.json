@@ -1,0 +1,109 @@
+{
+  "info": {
+    "name": "PandaPay Merchant API (skeleton)",
+    "_postman_id": "2e2b2fb2-7f9b-4ed8-a6a1-6a9f86a3b5a5",
+    "description": "Skeleton collection with HMAC pre-request signing. Replace paths and bodies once OpenAPI spec is available.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "(() => {",
+          "  try {",
+          "    const cryptoAvailable = (typeof crypto !== 'undefined' && typeof crypto.createHmac === 'function');",
+          "    const method = pm.request.method;",
+          "    const url = pm.request.url;",
+          "    const path = url.getPath();",
+          "    const query = url.getQueryString() || '';",
+          "",
+          "    let raw = '';",
+          "    if (pm.request.body && pm.request.body.mode === 'raw') {",
+          "      raw = pm.variables.replaceIn(pm.request.body.raw || '');",
+          "    }",
+          "",
+          "    const timestamp = Math.floor(Date.now() / 1000).toString();",
+          "    pm.environment.set('X_Timestamp', timestamp);",
+          "",
+          "    const keyId = pm.environment.get('KEY_ID') || pm.collectionVariables.get('KEY_ID') || '';",
+          "    const secret = pm.environment.get('SECRET_KEY') || pm.collectionVariables.get('SECRET_KEY') || '';",
+          "",
+          "    let bodyHashHex = '';",
+          "    let signatureHex = '';",
+          "",
+          "    if (cryptoAvailable) {",
+          "      bodyHashHex = crypto.createHash('sha256').update(raw, 'utf8').digest('hex');",
+          "      const canonical = [method, path, query, timestamp, bodyHashHex].join('\n');",
+          "      signatureHex = crypto.createHmac('sha256', secret).update(canonical, 'utf8').digest('hex');",
+          "    } else {",
+          "      // Fallback for limited environments (may not sign correctly)",
+          "      const canonical = [method, path, query, timestamp, ''].join('\n');",
+          "      signatureHex = canonical;",
+          "    }",
+          "",
+          "    pm.environment.set('signatureHex', signatureHex);",
+          "",
+          "    pm.request.headers.upsert({ key: 'X-API-Key', value: keyId });",
+          "    pm.request.headers.upsert({ key: 'X-Timestamp', value: timestamp });",
+          "    pm.request.headers.upsert({ key: 'X-Signature', value: signatureHex });",
+          "",
+          "    const token = (pm.environment.get('token') || '').trim();",
+          "    if (token) {",
+          "      pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+          "    }",
+          "",
+          "    console.log('canonical components:', { method, path, query, timestamp, bodyHashHex });",
+          "    console.log('signatureHex:', signatureHex);",
+          "  } catch (e) {",
+          "    console.error('pre-request error:', e);",
+          "  }",
+          "})();"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Template GET (replace path)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-API-Key", "value": "{{KEY_ID}}" },
+          { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
+          { "key": "X-Signature", "value": "{{signatureHex}}" }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/replace-with-path?example=1",
+          "host": ["{{BASE_URL}}"],
+          "path": ["replace-with-path"],
+          "query": [
+            { "key": "example", "value": "1" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Template POST (replace path + body)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-API-Key", "value": "{{KEY_ID}}" },
+          { "key": "X-Timestamp", "value": "{{X_Timestamp}}" },
+          { "key": "X-Signature", "value": "{{signatureHex}}" }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/replace-with-path",
+          "host": ["{{BASE_URL}}"],
+          "path": ["replace-with-path"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"example\": true\n}\n"
+        }
+      }
+    }
+  ]
+}
