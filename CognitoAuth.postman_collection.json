@@ -1,0 +1,164 @@
+{
+  "info": {
+    "name": "Cognito Auth (PKCE)",
+    "_postman_id": "c5b55a0f-3b1a-4b7a-9d1c-2a9dbb0b7f01",
+    "description": "Authorization with Amazon Cognito Hosted UI: generate PKCE login URL, exchange code for token, refresh token, optional client_credentials.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "PKCE: Generate Login URL",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Required env: AUTH_BASE, CLIENT_ID, REDIRECT_URI, SCOPE (optional)",
+              "const authBase = pm.environment.get('AUTH_BASE') || 'https://eu-central-1r7f3pdzvc.auth.eu-central-1.amazoncognito.com';",
+              "const clientId = pm.environment.get('CLIENT_ID') || '';",
+              "const redirectUri = pm.environment.get('REDIRECT_URI') || '';",
+              "const scope = pm.environment.get('SCOPE') || 'openid profile email';",
+              "if (!clientId || !redirectUri) { throw new Error('Set CLIENT_ID and REDIRECT_URI env vars'); }",
+              "// Generate code_verifier and code_challenge (S256)",
+              "const rnd = CryptoJS.lib.WordArray.random(48);",
+              "const codeVerifier = rnd.toString(CryptoJS.enc.Base64).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');",
+              "const sha256 = CryptoJS.SHA256(codeVerifier);",
+              "const codeChallenge = CryptoJS.enc.Base64.stringify(sha256).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');",
+              "const state = CryptoJS.lib.WordArray.random(16).toString(CryptoJS.enc.Hex);",
+              "pm.environment.set('CODE_VERIFIER', codeVerifier);",
+              "pm.environment.set('STATE', state);",
+              "const loginUrl = authBase + '/login' +\n  '?client_id=' + encodeURIComponent(clientId) +\n  '&redirect_uri=' + encodeURIComponent(redirectUri) +\n  '&response_type=code' +\n  '&scope=' + encodeURIComponent(scope) +\n  '&code_challenge_method=S256' +\n  '&code_challenge=' + encodeURIComponent(codeChallenge) +\n  '&state=' + encodeURIComponent(state);",
+              "pm.environment.set('LOGIN_URL', loginUrl);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login URL generated', function () {",
+              "  pm.expect(pm.environment.get('LOGIN_URL')).to.be.a('string');",
+              "});",
+              "console.log('Open in browser to login:', pm.environment.get('LOGIN_URL'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{LOGIN_URL}}"
+      }
+    },
+    {
+      "name": "Token: Exchange AUTH_CODE (PKCE)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/x-www-form-urlencoded" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            { "key": "grant_type", "value": "authorization_code" },
+            { "key": "client_id", "value": "{{CLIENT_ID}}" },
+            { "key": "redirect_uri", "value": "{{REDIRECT_URI}}" },
+            { "key": "code", "value": "{{AUTH_CODE}}" },
+            { "key": "code_verifier", "value": "{{CODE_VERIFIER}}" }
+          ]
+        },
+        "url": "{{AUTH_BASE}}/oauth2/token"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const data = pm.response.json();",
+              "if (data.access_token) pm.environment.set('token', data.access_token);",
+              "if (data.refresh_token) pm.environment.set('REFRESH_TOKEN', data.refresh_token);",
+              "pm.environment.set('token_type', data.token_type || 'Bearer');",
+              "const ttl = parseInt(data.expires_in || '3600', 10);",
+              "pm.environment.set('token_expires_at', String(Math.floor(Date.now()/1000)+ttl));",
+              "pm.test('Have access_token', () => pm.expect(data.access_token).to.be.ok);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Token: Refresh",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/x-www-form-urlencoded" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            { "key": "grant_type", "value": "refresh_token" },
+            { "key": "refresh_token", "value": "{{REFRESH_TOKEN}}" },
+            { "key": "client_id", "value": "{{CLIENT_ID}}" }
+          ]
+        },
+        "url": "{{AUTH_BASE}}/oauth2/token"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const data = pm.response.json();",
+              "if (data.access_token) pm.environment.set('token', data.access_token);",
+              "pm.environment.set('token_type', data.token_type || 'Bearer');",
+              "const ttl = parseInt(data.expires_in || '3600', 10);",
+              "pm.environment.set('token_expires_at', String(Math.floor(Date.now()/1000)+ttl));",
+              "pm.test('Refreshed access_token', () => pm.expect(data.access_token).to.be.ok);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Token: Client Credentials (optional)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/x-www-form-urlencoded" },
+          { "key": "Accept", "value": "application/json" },
+          { "key": "Authorization", "value": "Basic {{BASIC_AUTH}}" }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            { "key": "grant_type", "value": "client_credentials" },
+            { "key": "scope", "value": "{{SCOPE}}" }
+          ]
+        },
+        "url": "{{AUTH_BASE}}/oauth2/token"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const data = pm.response.json();",
+              "if (data.access_token) pm.environment.set('token', data.access_token);",
+              "pm.environment.set('token_type', data.token_type || 'Bearer');",
+              "const ttl = parseInt(data.expires_in || '3600', 10);",
+              "pm.environment.set('token_expires_at', String(Math.floor(Date.now()/1000)+ttl));",
+              "pm.test('Got client_credentials token', () => pm.expect(data.access_token).to.be.ok);"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
