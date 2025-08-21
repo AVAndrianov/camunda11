@@ -19,6 +19,15 @@
 <body>
 	<h2>POST http://localhost:8080/orders</h2>
 
+	<div id="corsWarn" style="display:none; padding:12px; background:#fff3cd; border:1px solid #ffeeba; color:#856404; margin-bottom:12px;">
+		<b>Замечено потенциальное CORS-ограничение.</b>
+		<div style="margin-top:8px;">
+			<button id="btnUseRelative">Использовать относительный путь (/orders)</button>
+			<button id="btnOpenSameOrigin">Открыть на http://localhost:8080/forms/orders.html</button>
+			<button id="btnEnableProxy">Включить прокси по умолчанию</button>
+		</div>
+	</div>
+
 	<label for="endpoint">Endpoint</label>
 	<input id="endpoint" type="text" value="http://localhost:8080/orders" />
 
@@ -30,7 +39,7 @@
 		</div>
 		<div>
 			<label for="proxy">CORS proxy (опционально)</label>
-			<input id="proxy" type="text" placeholder="например: https://cors.isomorphic-git.org/" />
+			<input id="proxy" type="text" placeholder="например: https://cors.isomorphic-git.org/" value="https://cors.isomorphic-git.org/" />
 			<small>Будет префикс к Endpoint для обхода CORS (на свой риск)</small>
 		</div>
 	</div>
@@ -161,6 +170,29 @@
 		}
 
 		$('send').addEventListener('click', send);
+
+		// Попытка автоматически убрать CORS: если страница уже на http://localhost:8080,
+		// используем относительный путь /orders.
+		document.addEventListener('DOMContentLoaded', () => {
+			try {
+				if (window.location.origin === 'http://localhost:8080') {
+					$('useRelative').checked = true;
+					$('endpoint').value = '/orders';
+				}
+
+				// Показать предупреждение, если origin страницы отличается от origin endpoint
+				const ep = $('endpoint').value.trim();
+				let epUrl;
+				try { epUrl = new URL(ep); } catch(_) { epUrl = new URL(ep, window.location.href); }
+				if (epUrl.origin !== window.location.origin) {
+					const warn = $('corsWarn');
+					warn.style.display = 'block';
+					$('btnUseRelative').onclick = () => { $('useRelative').checked = true; $('endpoint').value = '/orders'; warn.style.display='none'; };
+					$('btnOpenSameOrigin').onclick = () => { window.location.href = 'http://localhost:8080/forms/orders.html'; };
+					$('btnEnableProxy').onclick = () => { $('proxy').value = 'https://cors.isomorphic-git.org/'; warn.style.display='none'; };
+				}
+			} catch (_) {}
+		});
 	</script>
 </body>
 </html>
