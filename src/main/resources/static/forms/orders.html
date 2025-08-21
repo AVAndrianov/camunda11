@@ -38,19 +38,21 @@
 	<div class="row">
 		<div>
 			<label for="keyId">KEY_ID (X-API-Key)</label>
-			<input id="keyId" type="text" placeholder="введите KEY_ID" />
+			<input id="keyId" type="text" placeholder="введите KEY_ID" value="fa264f46c5ed5410c911dd13190d9547b6514e859ccea1d4d6863753f21758ae" />
 		</div>
 		<div>
 			<label for="secret">SECRET_KEY (HMAC secret)</label>
-			<input id="secret" type="password" placeholder="введите SECRET_KEY" />
+			<input id="secret" type="password" placeholder="введите SECRET_KEY" value="3b67edaa3e12493be5db73874572c8e1030d70fc9b71d15c9b07a11e65688971a60498c140896fac6766c39b2886b5461869af681ba63463d9de88bcf374defc" />
 		</div>
 	</div>
 
 	<label for="body">Тело запроса (сырой JSON)</label>
 	<textarea id="body">{
-  "AmountRUB": 1500,
-  "RequisiteType": "card",
-  "IdempotencyKey": "00000000-0000-4000-8000-000000000001"
+    "amount_rub": 100.00,
+    "requisite_type": "SBP",
+    "idempotency_key": "777e1e5e-ceac-4d39-b9a3-513d85a5156c",
+    "currency": "RUB",
+    "merchant_order_id": "TEST-123"
 }</textarea>
 
 	<button id="send">Отправить</button>
