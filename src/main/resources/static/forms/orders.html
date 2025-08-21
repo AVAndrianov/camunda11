@@ -24,6 +24,19 @@
 
 	<div class="row">
 		<div>
+			<label for="useRelative">Режим без CORS (относительный путь)</label>
+			<input id="useRelative" type="checkbox" />
+			<small>Если страница и API на одном origin, включите и используйте "/orders"</small>
+		</div>
+		<div>
+			<label for="proxy">CORS proxy (опционально)</label>
+			<input id="proxy" type="text" placeholder="например: https://cors.isomorphic-git.org/" />
+			<small>Будет префикс к Endpoint для обхода CORS (на свой риск)</small>
+		</div>
+	</div>
+
+	<div class="row">
+		<div>
 			<label for="keyId">KEY_ID (X-API-Key)</label>
 			<input id="keyId" type="text" placeholder="введите KEY_ID" />
 		</div>
@@ -61,8 +74,42 @@
 			catch { return text || "<пустой ответ>"; }
 		}
 
+		function buildTargetUrl() {
+			let endpoint = $('endpoint').value.trim();
+			const useRelative = $('useRelative').checked;
+			const proxy = $('proxy').value.trim();
+
+			try {
+				const url = new URL(endpoint);
+				if (useRelative) {
+					// Используем относительный путь для того же origin
+					endpoint = url.pathname + url.search;
+				}
+			} catch (_) {
+				// endpoint уже относительный
+			}
+
+			if (proxy) {
+				const needsSlash = proxy.endsWith('/') ? '' : '/';
+				return proxy + needsSlash + endpoint.replace(/^\//, '');
+			}
+			return endpoint;
+		}
+
+		function showCorsHintIfNeeded(target) {
+			let sameOrigin = true;
+			try {
+				const t = new URL(target, window.location.href);
+				sameOrigin = (t.origin === window.location.origin);
+			} catch (_) {}
+			if (!sameOrigin || window.location.protocol === 'file:') {
+				$('debug').textContent += "\n\nПодсказка: Похоже, запрос к другому origin или страница открыта как file:// — включите 'Режим без CORS' (относительный путь) или укажите CORS proxy. Также убедитесь, что backend разрешает заголовки: Content-Type, X-API-Key, X-Timestamp, X-Signature.";
+			}
+		}
+
 		async function send() {
 			const endpoint = $('endpoint').value.trim();
+			const target = buildTargetUrl();
 			const keyId = $('keyId').value.trim();
 			const secret = $('secret').value;
 			const rawBody = $('body').value;
@@ -75,13 +122,14 @@
 			const signatureHex = hmacHex(timestamp + rawBody, secret);
 
 			$('debug').textContent = JSON.stringify({
-				endpoint, timestamp, signatureHex,
+				endpoint, target, timestamp, signatureHex,
 				bodyPreview: rawBody.slice(0, 200) + (rawBody.length > 200 ? '…' : '')
 			}, null, 2);
+			showCorsHintIfNeeded(target);
 
 			try {
 				const started = performance.now();
-				const res = await fetch(endpoint, {
+				const res = await fetch(target, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
@@ -89,7 +137,11 @@
 						'X-Timestamp': timestamp,
 						'X-Signature': signatureHex
 					},
-					body: rawBody
+					body: rawBody,
+					mode: 'cors',
+					cache: 'no-store',
+					redirect: 'follow',
+					credentials: 'omit'
 				});
 				const ms = Math.round(performance.now() - started);
 
