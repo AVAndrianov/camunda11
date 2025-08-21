@@ -1,0 +1,221 @@
+openapi: 3.1.0
+info:
+  title: Trade Platform API
+  version: 1.0.0
+  description: |
+    API документация. Аутентификация — заголовки HMAC:
+    - X-API-Key: идентификатор ключа
+    - X-Timestamp: секунды UNIX
+    - X-Signature: HMAC-SHA256(timestamp + rawBody) в hex
+
+servers:
+  - url: http://localhost:8080
+
+components:
+  securitySchemes:
+    ApiKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    TimestampHeader:
+      type: apiKey
+      in: header
+      name: X-Timestamp
+    SignatureHeader:
+      type: apiKey
+      in: header
+      name: X-Signature
+
+  schemas:
+    CreateOrderRequest:
+      type: object
+      required: [amount_rub, requisite_type, idempotency_key, currency, merchant_order_id]
+      properties:
+        amount_rub:
+          type: number
+          format: float
+          example: 100.0
+        requisite_type:
+          type: string
+          description: Тип реквизита (например, SBP, card)
+          example: SBP
+        idempotency_key:
+          type: string
+          format: uuid
+          example: 777e1e5e-ceac-4d39-b9a3-513d85a5156c
+        currency:
+          type: string
+          example: RUB
+        merchant_order_id:
+          type: string
+          example: TEST-123
+
+    CreateOrderResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+
+security:
+  - ApiKeyHeader: []
+    TimestampHeader: []
+    SignatureHeader: []
+
+paths:
+  /orders:
+    get:
+      summary: List orders
+      description: Возвращает список заказов (пагинация, фильтры могут отличаться по реализации)
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1, default: 1 }
+        - in: query
+          name: per_page
+          schema: { type: integer, minimum: 1, maximum: 200, default: 10 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CreateOrderResponse'
+                  meta:
+                    type: object
+                    properties:
+                      page: { type: integer }
+                      per_page: { type: integer }
+        '401': { description: Unauthorized, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+
+    post:
+      summary: Create order
+      description: Создаёт заказ. Подпись HMAC-SHA256(timestamp + rawBody) → hex в `X-Signature`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateOrderRequest' }
+            examples:
+              default:
+                value:
+                  amount_rub: 100.00
+                  requisite_type: SBP
+                  idempotency_key: 777e1e5e-ceac-4d39-b9a3-513d85a5156c
+                  currency: RUB
+                  merchant_order_id: TEST-123
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CreateOrderResponse' }
+        '400': { description: Bad Request, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '401': { description: Unauthorized, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+      x-codeSamples:
+        - lang: curl
+          label: curl
+          source: |
+            curl -X POST 'http://localhost:8080/orders' \
+              -H 'Content-Type: application/json' \
+              -H 'X-API-Key: <KEY_ID>' \
+              -H 'X-Timestamp: <TS_SECONDS>' \
+              -H 'X-Signature: <HMAC_HEX>' \
+              -d '{"amount_rub":100.0,"requisite_type":"SBP","idempotency_key":"777e1e5e-ceac-4d39-b9a3-513d85a5156c","currency":"RUB","merchant_order_id":"TEST-123"}'
+        - lang: JavaScript
+          label: JS (browser)
+          source: |
+            const ts = Math.floor(Date.now()/1000).toString();
+            const body = JSON.stringify({
+              amount_rub: 100.0, requisite_type: 'SBP', idempotency_key: '777e1e5e-ceac-4d39-b9a3-513d85a5156c', currency: 'RUB', merchant_order_id: 'TEST-123'
+            });
+            const sig = CryptoJS.HmacSHA256(ts + body, '<SECRET>').toString(CryptoJS.enc.Hex);
+            fetch('http://localhost:8080/orders', {
+              method: 'POST', headers: {
+                'Content-Type': 'application/json', 'X-API-Key': '<KEY_ID>', 'X-Timestamp': ts, 'X-Signature': sig
+              }, body
+            });
+        - lang: Python
+          label: Python (requests)
+          source: |
+            import time, hmac, hashlib, requests, json
+            ts = str(int(time.time()))
+            body = {
+              'amount_rub': 100.0,
+              'requisite_type': 'SBP',
+              'idempotency_key': '777e1e5e-ceac-4d39-b9a3-513d85a5156c',
+              'currency': 'RUB',
+              'merchant_order_id': 'TEST-123'
+            }
+            raw = json.dumps(body, separators=(',',':'))
+            sig = hmac.new(b'<SECRET>', (ts + raw).encode(), hashlib.sha256).hexdigest()
+            r = requests.post('http://localhost:8080/orders',
+              headers={'Content-Type':'application/json','X-API-Key':'<KEY_ID>','X-Timestamp':ts,'X-Signature':sig}, data=raw)
+            print(r.status_code, r.text)
+        - lang: Go
+          label: Go (net/http)
+          source: |
+            raw := `{"amount_rub":100.0,"requisite_type":"SBP","idempotency_key":"777e1e5e-ceac-4d39-b9a3-513d85a5156c","currency":"RUB","merchant_order_id":"TEST-123"}`
+            ts := fmt.Sprintf("%d", time.Now().Unix())
+            mac := hmac.New(sha256.New, []byte("<SECRET>"))
+            mac.Write([]byte(ts + raw))
+            sig := hex.EncodeToString(mac.Sum(nil))
+            req, _ := http.NewRequest("POST", "http://localhost:8080/orders", strings.NewReader(raw))
+            req.Header.Set("Content-Type", "application/json")
+            req.Header.Set("X-API-Key", "<KEY_ID>")
+            req.Header.Set("X-Timestamp", ts)
+            req.Header.Set("X-Signature", sig)
+            resp, _ := http.DefaultClient.Do(req)
+            b, _ := io.ReadAll(resp.Body)
+            fmt.Println(resp.Status, string(b))
+
+  /orders/{id}:
+    get:
+      summary: Get order by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/CreateOrderResponse' } } } }
+        '404': { description: Not Found }
+
+  /orders/{id}/confirm:
+    get:
+      summary: Confirm by customer
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+
+  /order/info/{callback_uuid}:
+    get:
+      summary: Get order by callback UUID
+      parameters:
+        - in: path
+          name: callback_uuid
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/CreateOrderResponse' } } } }
+

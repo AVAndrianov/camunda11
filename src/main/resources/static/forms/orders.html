@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8" />
+	<title>Orders signer</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js" crossorigin="anonymous"></script>
+	<style>
+		body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; }
+		label { display: block; margin: 12px 0 4px; font-weight: 600; }
+		input[type="text"], input[type="password"], textarea { width: 100%; box-sizing: border-box; padding: 8px; font-family: monospace; }
+		textarea { height: 200px; }
+		.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+		button { margin-top: 16px; padding: 10px 16px; font-weight: 600; cursor: pointer; }
+		pre { background: #f6f8fa; padding: 12px; overflow: auto; }
+		small { color: #666; }
+	</style>
+</head>
+<body>
+	<h2>POST http://localhost:8080/orders</h2>
+
+	<div id="corsWarn" style="display:none; padding:12px; background:#fff3cd; border:1px solid #ffeeba; color:#856404; margin-bottom:12px;">
+		<b>Замечено потенциальное CORS-ограничение.</b>
+		<div style="margin-top:8px;">
+			<button id="btnUseRelative">Использовать относительный путь (/orders)</button>
+			<button id="btnOpenSameOrigin">Открыть на http://localhost:8080/forms/orders.html</button>
+			<button id="btnEnableProxy">Включить прокси по умолчанию</button>
+		</div>
+	</div>
+
+	<label for="endpoint">Endpoint</label>
+	<input id="endpoint" type="text" value="http://localhost:8080/orders" />
+
+	<div class="row">
+		<div>
+			<label for="useRelative">Режим без CORS (относительный путь)</label>
+			<input id="useRelative" type="checkbox" />
+			<small>Если страница и API на одном origin, включите и используйте "/orders"</small>
+		</div>
+		<div>
+			<label for="proxy">CORS proxy (опционально)</label>
+			<input id="proxy" type="text" placeholder="например: https://cors.isomorphic-git.org/" value="https://cors.isomorphic-git.org/" />
+			<small>Будет префикс к Endpoint для обхода CORS (на свой риск)</small>
+		</div>
+	</div>
+
+	<div class="row">
+		<div>
+			<label for="keyId">KEY_ID (X-API-Key)</label>
+			<input id="keyId" type="text" placeholder="введите KEY_ID" value="fa264f46c5ed5410c911dd13190d9547b6514e859ccea1d4d6863753f21758ae" />
+		</div>
+		<div>
+			<label for="secret">SECRET_KEY (HMAC secret)</label>
+			<input id="secret" type="password" placeholder="введите SECRET_KEY" value="3b67edaa3e12493be5db73874572c8e1030d70fc9b71d15c9b07a11e65688971a60498c140896fac6766c39b2886b5461869af681ba63463d9de88bcf374defc" />
+		</div>
+	</div>
+
+	<label for="body">Тело запроса (сырой JSON)</label>
+	<textarea id="body">{
+    "amount_rub": 100.00,
+    "requisite_type": "SBP",
+    "idempotency_key": "777e1e5e-ceac-4d39-b9a3-513d85a5156c",
+    "currency": "RUB",
+    "merchant_order_id": "TEST-123"
+}</textarea>
+
+	<button id="send">Отправить</button>
+
+	<h3>Отладка подписи</h3>
+	<small>HMAC-SHA256(timestamp + rawBody) → hex</small>
+	<pre id="debug"></pre>
+
+	<h3>Ответ сервера</h3>
+	<pre id="respStatus"></pre>
+	<pre id="respHeaders"></pre>
+	<pre id="respBody"></pre>
+
+	<script>
+		const $ = (id) => document.getElementById(id);
+		const nowSeconds = () => Math.floor(Date.now() / 1000).toString();
+		const hmacHex = (msg, secret) => CryptoJS.HmacSHA256(msg, secret).toString(CryptoJS.enc.Hex);
+
+		function prettyMaybeJSON(text) {
+			try { return JSON.stringify(JSON.parse(text), null, 2); }
+			catch { return text || "<пустой ответ>"; }
+		}
+
+		function buildTargetUrl() {
+			let endpoint = $('endpoint').value.trim();
+			const useRelative = $('useRelative').checked;
+			const proxy = $('proxy').value.trim();
+
+			try {
+				const url = new URL(endpoint);
+				if (useRelative) {
+					// Используем относительный путь для того же origin
+					endpoint = url.pathname + url.search;
+				}
+			} catch (_) {
+				// endpoint уже относительный
+			}
+
+			if (proxy) {
+				const needsSlash = proxy.endsWith('/') ? '' : '/';
+				return proxy + needsSlash + endpoint.replace(/^\//, '');
+			}
+			return endpoint;
+		}
+
+		function showCorsHintIfNeeded(target) {
+			let sameOrigin = true;
+			try {
+				const t = new URL(target, window.location.href);
+				sameOrigin = (t.origin === window.location.origin);
+			} catch (_) {}
+			if (!sameOrigin || window.location.protocol === 'file:') {
+				$('debug').textContent += "\n\nПодсказка: Похоже, запрос к другому origin или страница открыта как file:// — включите 'Режим без CORS' (относительный путь) или укажите CORS proxy. Также убедитесь, что backend разрешает заголовки: Content-Type, X-API-Key, X-Timestamp, X-Signature.";
+			}
+		}
+
+		async function send() {
+			const endpoint = $('endpoint').value.trim();
+			const target = buildTargetUrl();
+			const keyId = $('keyId').value.trim();
+			const secret = $('secret').value;
+			const rawBody = $('body').value;
+
+			if (!endpoint) return alert('Endpoint пуст');
+			if (!keyId) return alert('KEY_ID пуст');
+			if (!secret) return alert('SECRET_KEY пуст');
+
+			const timestamp = nowSeconds();
+			const signatureHex = hmacHex(timestamp + rawBody, secret);
+
+			$('debug').textContent = JSON.stringify({
+				endpoint, target, timestamp, signatureHex,
+				bodyPreview: rawBody.slice(0, 200) + (rawBody.length > 200 ? '…' : '')
+			}, null, 2);
+			showCorsHintIfNeeded(target);
+
+			try {
+				const started = performance.now();
+				const res = await fetch(target, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'X-API-Key': keyId,
+						'X-Timestamp': timestamp,
+						'X-Signature': signatureHex
+					},
+					body: rawBody,
+					mode: 'cors',
+					cache: 'no-store',
+					redirect: 'follow',
+					credentials: 'omit'
+				});
+				const ms = Math.round(performance.now() - started);
+
+				const headersObj = Object.fromEntries(res.headers.entries());
+				const text = await res.text();
+
+				$('respStatus').textContent = `HTTP ${res.status} ${res.statusText} • ${ms} ms`;
+				$('respHeaders').textContent = 'Headers:\n' + JSON.stringify(headersObj, null, 2);
+				$('respBody').textContent = prettyMaybeJSON(text);
+			} catch (e) {
+				$('respStatus').textContent = 'Ошибка сети/CORS: ' + e.message;
+				$('respHeaders').textContent = '';
+				$('respBody').textContent = '';
+			}
+		}
+
+		$('send').addEventListener('click', send);
+
+		// Попытка автоматически убрать CORS: если страница уже на http://localhost:8080,
+		// используем относительный путь /orders.
+		document.addEventListener('DOMContentLoaded', () => {
+			try {
+				if (window.location.origin === 'http://localhost:8080') {
+					$('useRelative').checked = true;
+					$('endpoint').value = '/orders';
+				}
+
+				// Показать предупреждение, если origin страницы отличается от origin endpoint
+				const ep = $('endpoint').value.trim();
+				let epUrl;
+				try { epUrl = new URL(ep); } catch(_) { epUrl = new URL(ep, window.location.href); }
+				if (epUrl.origin !== window.location.origin) {
+					const warn = $('corsWarn');
+					warn.style.display = 'block';
+					$('btnUseRelative').onclick = () => { $('useRelative').checked = true; $('endpoint').value = '/orders'; warn.style.display='none'; };
+					$('btnOpenSameOrigin').onclick = () => { window.location.href = 'http://localhost:8080/forms/orders.html'; };
+					$('btnEnableProxy').onclick = () => { $('proxy').value = 'https://cors.isomorphic-git.org/'; warn.style.display='none'; };
+				}
+			} catch (_) {}
+		});
+	</script>
+</body>
+</html>
+
